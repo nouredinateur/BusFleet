@@ -28,6 +28,7 @@ import {
   CheckCircle,
   Loader2,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FormData {
   email: string;
@@ -79,21 +80,18 @@ export default function AuthForm() {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Email validation
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (!validatePassword(formData.password)) {
       newErrors.password = "Password must be at least 8 characters long";
     }
 
-    // Signup specific validations
     if (!isLogin) {
       if (!formData.fullName) {
         newErrors.fullName = "Full name is required";
@@ -118,7 +116,6 @@ export default function AuthForm() {
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -133,7 +130,6 @@ export default function AuthForm() {
     setLoading(true);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       if (isLogin) {
@@ -144,7 +140,6 @@ export default function AuthForm() {
         );
       }
 
-      // Reset form after success
       setTimeout(() => {
         setFormData({
           email: "",
@@ -176,21 +171,21 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-6 text-center pb-8">
-            {/* Logo/Icon */}
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+            {/* Brand Logo */}
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-persian-blue-500 to-dark-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
               <Bus className="w-8 h-8 text-white" />
             </div>
             
             {/* Title and Description */}
             <div className="space-y-2">
-              <CardTitle className="text-2xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-buenard font-bold text-platinum-900">
                 {isLogin ? "Welcome Back" : "Create Account"}
               </CardTitle>
-              <CardDescription className="text-gray-600 text-base">
+              <CardDescription className="text-platinum-700 text-base font-inknut">
                 {isLogin
                   ? "Sign in to access your bus management dashboard"
                   : "Join our bus management platform today"}
@@ -201,9 +196,9 @@ export default function AuthForm() {
           <CardContent className="space-y-6 px-8">
             {/* Error Alert */}
             {errors.general && (
-              <Alert className="border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-700">
+              <Alert className="border-error-200 bg-error-50">
+                <AlertCircle className="h-4 w-4 text-error-600" />
+                <AlertDescription className="text-error-700 font-forum">
                   {errors.general}
                 </AlertDescription>
               </Alert>
@@ -211,9 +206,9 @@ export default function AuthForm() {
 
             {/* Success Alert */}
             {success && (
-              <Alert className="border-green-200 bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-700">
+              <Alert className="border-success-200 bg-success-50">
+                <CheckCircle className="h-4 w-4 text-success-600" />
+                <AlertDescription className="text-success-700 font-forum">
                   {success}
                 </AlertDescription>
               </Alert>
@@ -223,151 +218,156 @@ export default function AuthForm() {
               {/* Full Name Field (Signup only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="fullName" className="text-sm font-medium text-platinum-800 font-inknut">
                     Full Name
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
                     <Input
                       id="fullName"
                       type="text"
                       placeholder="Enter your full name"
                       value={formData.fullName}
                       onChange={(e) => handleInputChange("fullName", e.target.value)}
-                      className={`pl-10 h-11 transition-all duration-200 ${
+                      className={cn(
+                        "pl-10 h-11 font-forum transition-all duration-200",
                         errors.fullName
-                          ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-                      }`}
+                          ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
+                          : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
+                      )}
                       disabled={loading}
                     />
                   </div>
                   {errors.fullName && (
-                    <p className="text-sm text-red-600">{errors.fullName}</p>
+                    <p className="text-sm text-error-600 font-forum">{errors.fullName}</p>
                   )}
                 </div>
               )}
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="email" className="text-sm font-medium text-platinum-800 font-inknut">
                   Email Address
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`pl-10 h-11 transition-all duration-200 ${
+                    className={cn(
+                      "pl-10 h-11 font-forum transition-all duration-200",
                       errors.email
-                        ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
-                        : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-                    }`}
+                        ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
+                        : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
+                    )}
                     disabled={loading}
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email}</p>
+                  <p className="text-sm text-error-600 font-forum">{errors.email}</p>
                 )}
               </div>
 
               {/* Phone Field (Signup only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="phone" className="text-sm font-medium text-platinum-800 font-inknut">
                     Phone Number
                   </Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
                     <Input
                       id="phone"
                       type="tel"
                       placeholder="Enter your phone number"
                       value={formData.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
-                      className={`pl-10 h-11 transition-all duration-200 ${
+                      className={cn(
+                        "pl-10 h-11 font-forum transition-all duration-200",
                         errors.phone
-                          ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-                      }`}
+                          ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
+                          : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
+                      )}
                       disabled={loading}
                     />
                   </div>
                   {errors.phone && (
-                    <p className="text-sm text-red-600">{errors.phone}</p>
+                    <p className="text-sm text-error-600 font-forum">{errors.phone}</p>
                   )}
                 </div>
               )}
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="password" className="text-sm font-medium text-platinum-800 font-inknut">
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    className={`pl-10 pr-10 h-11 transition-all duration-200 ${
+                    className={cn(
+                      "pl-10 pr-10 h-11 font-forum transition-all duration-200",
                       errors.password
-                        ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
-                        : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-                    }`}
+                        ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
+                        : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
+                    )}
                     disabled={loading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors"
                     disabled={loading}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-600">{errors.password}</p>
+                  <p className="text-sm text-error-600 font-forum">{errors.password}</p>
                 )}
               </div>
 
               {/* Confirm Password Field (Signup only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-platinum-800 font-inknut">
                     Confirm Password
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      className={`pl-10 pr-10 h-11 transition-all duration-200 ${
+                      className={cn(
+                        "pl-10 pr-10 h-11 font-forum transition-all duration-200",
                         errors.confirmPassword
-                          ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
-                          : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-                      }`}
+                          ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
+                          : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
+                      )}
                       disabled={loading}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors"
                       disabled={loading}
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-sm text-red-600">{errors.confirmPassword}</p>
+                    <p className="text-sm text-error-600 font-forum">{errors.confirmPassword}</p>
                   )}
                 </div>
               )}
@@ -375,7 +375,7 @@ export default function AuthForm() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium text-base shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50"
+                className="w-full h-11 bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-medium text-base font-inknut shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50 focus:ring-2 focus:ring-persian-blue-400 focus:ring-offset-2"
                 disabled={loading}
               >
                 {loading ? (
@@ -391,17 +391,17 @@ export default function AuthForm() {
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4 pt-6 px-8 pb-8">
-            <Separator className="bg-gray-200" />
+            <Separator className="bg-platinum-300" />
             
             {/* Toggle Mode */}
             <div className="text-center space-y-3">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-platinum-700 font-forum">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
               </p>
               <Button
                 variant="ghost"
                 onClick={toggleMode}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition-all duration-200"
+                className="text-persian-blue-500 hover:text-persian-blue-600 hover:bg-persian-blue-50 font-medium font-inknut transition-all duration-200 focus:ring-2 focus:ring-persian-blue-400"
                 disabled={loading}
               >
                 {isLogin ? "Create Account" : "Sign In"}
@@ -412,7 +412,7 @@ export default function AuthForm() {
             {isLogin && (
               <Button
                 variant="link"
-                className="text-sm text-gray-500 hover:text-gray-700 p-0 h-auto font-normal"
+                className="text-sm text-dark-cyan-500 hover:text-dark-cyan-600 p-0 h-auto font-normal font-forum focus:ring-2 focus:ring-dark-cyan-400"
                 disabled={loading}
               >
                 Forgot your password?

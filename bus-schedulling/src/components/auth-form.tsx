@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,6 +49,7 @@ interface FormErrors {
 }
 
 export default function AuthForm() {
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -124,34 +126,51 @@ export default function AuthForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess("");
+    setErrors({});
 
     if (!validateForm()) return;
 
     setLoading(true);
 
+    const endpoint = isLogin ? "/api/login" : "/api/signup";
+    const body = isLogin
+      ? {
+          email: formData.email,
+          password: formData.password,
+        }
+      : {
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          age: 18, // The API requires age, but it's not in the form. Hardcoding a default.
+        };
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setErrors({ general: result.error || "An error occurred." });
+        return;
+      }
 
       if (isLogin) {
         setSuccess("Login successful! Redirecting to dashboard...");
+        setTimeout(() => router.push("/dashboard"), 1500);
       } else {
-        setSuccess(
-          "Account created successfully! Please check your email for verification."
-        );
+        setSuccess("Account created successfully! Please sign in.");
+        setTimeout(() => {
+          toggleMode();
+          setSuccess("");
+        }, 3000);
       }
-
-      setTimeout(() => {
-        setFormData({
-          email: "",
-          password: "",
-          confirmPassword: "",
-          fullName: "",
-          phone: "",
-        });
-        setSuccess("");
-      }, 3000);
     } catch (error) {
-      setErrors({ general: "An error occurred. Please try again." });
+      setErrors({ general: "Could not connect to the server. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -171,9 +190,9 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 p-4">
+      <div className="w-full max-w-md mx-auto">
+        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm w-[400px]">
           <CardHeader className="space-y-6 text-center pb-8">
             {/* Brand Logo */}
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-persian-blue-500 to-dark-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">

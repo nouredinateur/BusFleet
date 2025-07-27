@@ -145,14 +145,19 @@ export default function AuthForm() {
           age: 18, // The API requires age, but it's not in the form. Hardcoding a default.
         };
 
+    console.log(`🚀 Submitting ${isLogin ? "login" : "signup"} request`);
+
     try {
       const response = await fetch(endpoint, {
         method: "POST",
+        credentials: "include", // This is important for cookies
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
       const result = await response.json();
+      console.log(`📡 Response status: ${response.status}`);
+      console.log(`📡 Response data:`, result);
 
       if (!response.ok) {
         setErrors({ general: result.error || "An error occurred." });
@@ -161,7 +166,23 @@ export default function AuthForm() {
 
       if (isLogin) {
         setSuccess("Login successful! Redirecting to dashboard...");
-        setTimeout(() => router.push("/dashboard"), 1500);
+        console.log(`✅ Login successful, redirecting in 1.5 seconds...`);
+
+        // Check if cookie was set by making a test request
+        setTimeout(async () => {
+          console.log(`🔄 Attempting redirect to dashboard...`);
+          try {
+            // Test if we can access a protected route
+            const testResponse = await fetch("/api/drivers", {
+              credentials: "include",
+            });
+            console.log(`🧪 Test request status: ${testResponse.status}`);
+          } catch (error) {
+            console.log(`🧪 Test request failed:`, error);
+          }
+
+          window.location.href = "/dashboard";
+        }, 1000);
       } else {
         setSuccess("Account created successfully! Please sign in.");
         setTimeout(() => {
@@ -170,7 +191,10 @@ export default function AuthForm() {
         }, 3000);
       }
     } catch (error) {
-      setErrors({ general: "Could not connect to the server. Please try again." });
+      console.error(`❌ Request failed:`, error);
+      setErrors({
+        general: "Could not connect to the server. Please try again.",
+      });
     } finally {
       setLoading(false);
     }

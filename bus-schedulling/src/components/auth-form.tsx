@@ -179,7 +179,7 @@ export default function AuthForm() {
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-persian-blue-500 to-dark-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
               <Bus className="w-8 h-8 text-white" />
             </div>
-            
+
             {/* Title and Description */}
             <div className="space-y-2">
               <CardTitle className="text-2xl font-buenard font-bold text-platinum-900">
@@ -218,7 +218,10 @@ export default function AuthForm() {
               {/* Full Name Field (Signup only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-sm font-medium text-platinum-800 font-inknut">
+                  <Label
+                    htmlFor="fullName"
+                    className="text-sm font-medium text-platinum-800 font-inknut"
+                  >
                     Full Name
                   </Label>
                   <div className="relative">
@@ -228,7 +231,9 @@ export default function AuthForm() {
                       type="text"
                       placeholder="Enter your full name"
                       value={formData.fullName}
-                      onChange={(e) => handleInputChange("fullName", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("fullName", e.target.value)
+                      }
                       className={cn(
                         "pl-10 h-11 font-forum transition-all duration-200",
                         errors.fullName
@@ -239,14 +244,19 @@ export default function AuthForm() {
                     />
                   </div>
                   {errors.fullName && (
-                    <p className="text-sm text-error-600 font-forum">{errors.fullName}</p>
+                    <p className="text-sm text-error-600 font-forum">
+                      {errors.fullName}
+                    </p>
                   )}
                 </div>
               )}
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-platinum-800 font-inknut">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-platinum-800 font-inknut"
+                >
                   Email Address
                 </Label>
                 <div className="relative">
@@ -267,14 +277,19 @@ export default function AuthForm() {
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-sm text-error-600 font-forum">{errors.email}</p>
+                  <p className="text-sm text-error-600 font-forum">
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
               {/* Phone Field (Signup only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-medium text-platinum-800 font-inknut">
+                  <Label
+                    htmlFor="phone"
+                    className="text-sm font-medium text-platinum-800 font-inknut"
+                  >
                     Phone Number
                   </Label>
                   <div className="relative">
@@ -284,7 +299,9 @@ export default function AuthForm() {
                       type="tel"
                       placeholder="Enter your phone number"
                       value={formData.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("phone", e.target.value)
+                      }
                       className={cn(
                         "pl-10 h-11 font-forum transition-all duration-200",
                         errors.phone
@@ -295,14 +312,19 @@ export default function AuthForm() {
                     />
                   </div>
                   {errors.phone && (
-                    <p className="text-sm text-error-600 font-forum">{errors.phone}</p>
+                    <p className="text-sm text-error-600 font-forum">
+                      {errors.phone}
+                    </p>
                   )}
                 </div>
               )}
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-platinum-800 font-inknut">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-platinum-800 font-inknut"
+                >
                   Password
                 </Label>
                 <div className="relative">
@@ -312,7 +334,9 @@ export default function AuthForm() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     className={cn(
                       "pl-10 pr-10 h-11 font-forum transition-all duration-200",
                       errors.password
@@ -327,18 +351,27 @@ export default function AuthForm() {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors"
                     disabled={loading}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-error-600 font-forum">{errors.password}</p>
+                  <p className="text-sm text-error-600 font-forum">
+                    {errors.password}
+                  </p>
                 )}
               </div>
 
               {/* Confirm Password Field (Signup only) */}
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-platinum-800 font-inknut">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="text-sm font-medium text-platinum-800 font-inknut"
+                  >
                     Confirm Password
                   </Label>
                   <div className="relative">
@@ -348,7 +381,9 @@ export default function AuthForm() {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       value={formData.confirmPassword}
-                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("confirmPassword", e.target.value)
+                      }
                       className={cn(
                         "pl-10 pr-10 h-11 font-forum transition-all duration-200",
                         errors.confirmPassword
@@ -359,15 +394,23 @@ export default function AuthForm() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors"
                       disabled={loading}
                     >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-sm text-error-600 font-forum">{errors.confirmPassword}</p>
+                    <p className="text-sm text-error-600 font-forum">
+                      {errors.confirmPassword}
+                    </p>
                   )}
                 </div>
               )}
@@ -381,7 +424,9 @@ export default function AuthForm() {
                 {loading ? (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{isLogin ? "Signing In..." : "Creating Account..."}</span>
+                    <span>
+                      {isLogin ? "Signing In..." : "Creating Account..."}
+                    </span>
                   </div>
                 ) : (
                   <span>{isLogin ? "Sign In" : "Create Account"}</span>
@@ -392,11 +437,13 @@ export default function AuthForm() {
 
           <CardFooter className="flex flex-col space-y-4 pt-6 px-8 pb-8">
             <Separator className="bg-platinum-300" />
-            
+
             {/* Toggle Mode */}
             <div className="text-center space-y-3">
               <p className="text-sm text-platinum-700 font-forum">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}
+                {isLogin
+                  ? "Don't have an account?"
+                  : "Already have an account?"}
               </p>
               <Button
                 variant="ghost"

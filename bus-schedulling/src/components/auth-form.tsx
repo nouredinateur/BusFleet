@@ -201,7 +201,10 @@ export default function AuthForm() {
 
             {/* Title and Description */}
             <div className="space-y-2">
-              <CardTitle className="text-2xl font-buenard font-bold text-platinum-900">
+              <CardTitle
+                data-testid="auth-form-title"
+                className="text-2xl font-buenard font-bold text-platinum-900"
+              >
                 {isLogin ? "Welcome Back" : "Create Account"}
               </CardTitle>
               <CardDescription className="text-platinum-700 text-base font-inknut">

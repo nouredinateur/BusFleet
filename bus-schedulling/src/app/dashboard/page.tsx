@@ -114,17 +114,17 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  
+
   // Dialog states
   const [driverDialogOpen, setDriverDialogOpen] = useState(false);
   const [busDialogOpen, setBusDialogOpen] = useState(false);
   const [routeDialogOpen, setRouteDialogOpen] = useState(false);
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
-  
+
   // Form states
   const [editingItem, setEditingItem] = useState<any>(null);
   const [formData, setFormData] = useState<FormData>({});
-  
+
   // Filter states
   const [filterDate, setFilterDate] = useState("");
   const [filterDriver, setFilterDriver] = useState("");
@@ -164,7 +164,7 @@ export default function Dashboard() {
     try {
       const method = editingItem ? "PUT" : "POST";
       const body = editingItem ? { id: editingItem.id, ...formData } : formData;
-      
+
       const response = await fetch(`/api/${type}s`, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -177,40 +177,48 @@ export default function Dashboard() {
       }
 
       const result = await response.json();
-      
+
       if (type === "driver") {
         if (editingItem) {
-          setDrivers(prev => prev.map(d => d.id === editingItem.id ? result : d));
+          setDrivers((prev) =>
+            prev.map((d) => (d.id === editingItem.id ? result : d))
+          );
           setSuccess("Driver updated successfully");
         } else {
-          setDrivers(prev => [...prev, result]);
+          setDrivers((prev) => [...prev, result]);
           setSuccess("Driver created successfully");
         }
         setDriverDialogOpen(false);
       } else if (type === "bus") {
         if (editingItem) {
-          setBuses(prev => prev.map(b => b.id === editingItem.id ? result : b));
+          setBuses((prev) =>
+            prev.map((b) => (b.id === editingItem.id ? result : b))
+          );
           setSuccess("Bus updated successfully");
         } else {
-          setBuses(prev => [...prev, result]);
+          setBuses((prev) => [...prev, result]);
           setSuccess("Bus created successfully");
         }
         setBusDialogOpen(false);
       } else if (type === "route") {
         if (editingItem) {
-          setRoutes(prev => prev.map(r => r.id === editingItem.id ? result : r));
+          setRoutes((prev) =>
+            prev.map((r) => (r.id === editingItem.id ? result : r))
+          );
           setSuccess("Route updated successfully");
         } else {
-          setRoutes(prev => [...prev, result]);
+          setRoutes((prev) => [...prev, result]);
           setSuccess("Route created successfully");
         }
         setRouteDialogOpen(false);
       } else if (type === "shift") {
         if (editingItem) {
-          setShifts(prev => prev.map(s => s.id === editingItem.id ? result : s));
+          setShifts((prev) =>
+            prev.map((s) => (s.id === editingItem.id ? result : s))
+          );
           setSuccess("Shift updated successfully");
         } else {
-          setShifts(prev => [...prev, result]);
+          setShifts((prev) => [...prev, result]);
           setSuccess("Shift created successfully");
         }
         setShiftDialogOpen(false);
@@ -218,7 +226,7 @@ export default function Dashboard() {
         const shiftsRes = await fetch("/api/shifts");
         if (shiftsRes.ok) setShifts(await shiftsRes.json());
       }
-      
+
       setFormData({});
       setEditingItem(null);
     } catch (err: any) {
@@ -231,7 +239,7 @@ export default function Dashboard() {
   const handleEdit = (type: string, item: any) => {
     setEditingItem(item);
     setFormData(item);
-    
+
     if (type === "driver") setDriverDialogOpen(true);
     else if (type === "bus") setBusDialogOpen(true);
     else if (type === "route") setRouteDialogOpen(true);
@@ -240,7 +248,7 @@ export default function Dashboard() {
 
   const handleDelete = async (type: string, id: number) => {
     if (!confirm("Are you sure you want to delete this item?")) return;
-    
+
     try {
       const response = await fetch(`/api/${type}s?id=${id}`, {
         method: "DELETE",
@@ -252,13 +260,13 @@ export default function Dashboard() {
       }
 
       if (type === "driver") {
-        setDrivers(prev => prev.filter(d => d.id !== id));
+        setDrivers((prev) => prev.filter((d) => d.id !== id));
       } else if (type === "bus") {
-        setBuses(prev => prev.filter(b => b.id !== id));
+        setBuses((prev) => prev.filter((b) => b.id !== id));
       } else if (type === "route") {
-        setRoutes(prev => prev.filter(r => r.id !== id));
+        setRoutes((prev) => prev.filter((r) => r.id !== id));
       } else if (type === "shift") {
-        setShifts(prev => prev.filter(s => s.id !== id));
+        setShifts((prev) => prev.filter((s) => s.id !== id));
       }
       setSuccess("Item deleted successfully");
     } catch (err: any) {
@@ -269,7 +277,7 @@ export default function Dashboard() {
   const openCreateDialog = (type: string) => {
     setEditingItem(null);
     setFormData({});
-    
+
     if (type === "driver") setDriverDialogOpen(true);
     else if (type === "bus") setBusDialogOpen(true);
     else if (type === "route") setRouteDialogOpen(true);
@@ -277,9 +285,10 @@ export default function Dashboard() {
   };
 
   const getFilteredShifts = () => {
-    return shifts.filter(shift => {
+    return shifts.filter((shift) => {
       if (filterDate && shift.shift_date !== filterDate) return false;
-      if (filterDriver && shift.driver_id.toString() !== filterDriver) return false;
+      if (filterDriver && shift.driver_id.toString() !== filterDriver)
+        return false;
       if (filterBus && shift.bus_id.toString() !== filterBus) return false;
       return true;
     });
@@ -405,14 +414,20 @@ export default function Dashboard() {
                     <Label className="text-sm font-medium text-platinum-800 font-inknut">
                       Driver
                     </Label>
-                    <Select value={filterDriver} onValueChange={setFilterDriver}>
+                    <Select
+                      value={filterDriver}
+                      onValueChange={setFilterDriver}
+                    >
                       <SelectTrigger className="font-forum">
                         <SelectValue placeholder="All drivers" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All drivers</SelectItem>
+                        <SelectItem value="all">All drivers</SelectItem>
                         {drivers.map((driver) => (
-                          <SelectItem key={driver.id} value={driver.id.toString()}>
+                          <SelectItem
+                            key={driver.id}
+                            value={driver.id.toString()}
+                          >
                             {driver.name}
                           </SelectItem>
                         ))}
@@ -428,7 +443,7 @@ export default function Dashboard() {
                         <SelectValue placeholder="All buses" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All buses</SelectItem>
+                        <SelectItem value="all">All buses</SelectItem>
                         {buses.map((bus) => (
                           <SelectItem key={bus.id} value={bus.id.toString()}>
                             {bus.plate_number}
@@ -459,8 +474,12 @@ export default function Dashboard() {
                   <TableBody>
                     {getFilteredShifts().map((shift) => (
                       <TableRow key={shift.id}>
-                        <TableCell className="font-forum">{shift.shift_date}</TableCell>
-                        <TableCell className="font-forum">{shift.shift_time}</TableCell>
+                        <TableCell className="font-forum">
+                          {shift.shift_date}
+                        </TableCell>
+                        <TableCell className="font-forum">
+                          {shift.shift_time}
+                        </TableCell>
                         <TableCell className="font-forum">
                           {shift.driver?.name || "Unknown"}
                         </TableCell>
@@ -468,7 +487,9 @@ export default function Dashboard() {
                           {shift.bus?.plate_number || "Unknown"}
                         </TableCell>
                         <TableCell className="font-forum">
-                          {shift.route ? `${shift.route.origin} → ${shift.route.destination}` : "Unknown"}
+                          {shift.route
+                            ? `${shift.route.origin} → ${shift.route.destination}`
+                            : "Unknown"}
                         </TableCell>
                         <TableCell className="font-forum">
                           {shift.route?.estimated_duration_minutes || 0} min
@@ -524,7 +545,9 @@ export default function Dashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="font-inknut">Name</TableHead>
-                      <TableHead className="font-inknut">License Number</TableHead>
+                      <TableHead className="font-inknut">
+                        License Number
+                      </TableHead>
                       <TableHead className="font-inknut">Status</TableHead>
                       <TableHead className="font-inknut">Actions</TableHead>
                     </TableRow>
@@ -532,10 +555,16 @@ export default function Dashboard() {
                   <TableBody>
                     {drivers.map((driver) => (
                       <TableRow key={driver.id}>
-                        <TableCell className="font-forum">{driver.name}</TableCell>
-                        <TableCell className="font-forum">{driver.license_number}</TableCell>
+                        <TableCell className="font-forum">
+                          {driver.name}
+                        </TableCell>
+                        <TableCell className="font-forum">
+                          {driver.license_number}
+                        </TableCell>
                         <TableCell>
-                          <Badge variant={driver.available ? "success" : "secondary"}>
+                          <Badge
+                            variant={driver.available ? "success" : "secondary"}
+                          >
                             {driver.available ? "Available" : "Unavailable"}
                           </Badge>
                         </TableCell>
@@ -589,7 +618,9 @@ export default function Dashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-inknut">Plate Number</TableHead>
+                      <TableHead className="font-inknut">
+                        Plate Number
+                      </TableHead>
                       <TableHead className="font-inknut">Capacity</TableHead>
                       <TableHead className="font-inknut">Actions</TableHead>
                     </TableRow>
@@ -597,8 +628,12 @@ export default function Dashboard() {
                   <TableBody>
                     {buses.map((bus) => (
                       <TableRow key={bus.id}>
-                        <TableCell className="font-forum">{bus.plate_number}</TableCell>
-                        <TableCell className="font-forum">{bus.capacity} passengers</TableCell>
+                        <TableCell className="font-forum">
+                          {bus.plate_number}
+                        </TableCell>
+                        <TableCell className="font-forum">
+                          {bus.capacity} passengers
+                        </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button
@@ -658,8 +693,12 @@ export default function Dashboard() {
                   <TableBody>
                     {routes.map((route) => (
                       <TableRow key={route.id}>
-                        <TableCell className="font-forum">{route.origin}</TableCell>
-                        <TableCell className="font-forum">{route.destination}</TableCell>
+                        <TableCell className="font-forum">
+                          {route.origin}
+                        </TableCell>
+                        <TableCell className="font-forum">
+                          {route.destination}
+                        </TableCell>
                         <TableCell className="font-forum">
                           {route.estimated_duration_minutes} minutes
                         </TableCell>
@@ -701,7 +740,9 @@ export default function Dashboard() {
               {editingItem ? "Edit Driver" : "Add New Driver"}
             </DialogTitle>
             <DialogDescription className="font-forum">
-              {editingItem ? "Update driver information" : "Enter driver details"}
+              {editingItem
+                ? "Update driver information"
+                : "Enter driver details"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -714,7 +755,9 @@ export default function Dashboard() {
                 <Input
                   placeholder="Enter driver name"
                   value={formData.name || ""}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="pl-10 font-forum"
                 />
               </div>
@@ -726,7 +769,9 @@ export default function Dashboard() {
               <Input
                 placeholder="Enter license number"
                 value={formData.license_number || ""}
-                onChange={(e) => setFormData({ ...formData, license_number: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, license_number: e.target.value })
+                }
                 className="font-forum"
               />
             </div>
@@ -736,7 +781,9 @@ export default function Dashboard() {
               </Label>
               <Select
                 value={formData.available?.toString() || "true"}
-                onValueChange={(value) => setFormData({ ...formData, available: value === "true" })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, available: value === "true" })
+                }
               >
                 <SelectTrigger className="font-forum">
                   <SelectValue />
@@ -791,7 +838,9 @@ export default function Dashboard() {
                 <Input
                   placeholder="Enter plate number"
                   value={formData.plate_number || ""}
-                  onChange={(e) => setFormData({ ...formData, plate_number: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, plate_number: e.target.value })
+                  }
                   className="pl-10 font-forum"
                 />
               </div>
@@ -804,7 +853,12 @@ export default function Dashboard() {
                 type="number"
                 placeholder="Enter passenger capacity"
                 value={formData.capacity || ""}
-                onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    capacity: parseInt(e.target.value),
+                  })
+                }
                 className="font-forum"
               />
             </div>
@@ -852,7 +906,9 @@ export default function Dashboard() {
                 <Input
                   placeholder="Enter origin location"
                   value={formData.origin || ""}
-                  onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, origin: e.target.value })
+                  }
                   className="pl-10 font-forum"
                 />
               </div>
@@ -866,7 +922,9 @@ export default function Dashboard() {
                 <Input
                   placeholder="Enter destination location"
                   value={formData.destination || ""}
-                  onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, destination: e.target.value })
+                  }
                   className="pl-10 font-forum"
                 />
               </div>
@@ -881,7 +939,12 @@ export default function Dashboard() {
                   type="number"
                   placeholder="Enter duration in minutes"
                   value={formData.estimated_duration_minutes || ""}
-                  onChange={(e) => setFormData({ ...formData, estimated_duration_minutes: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      estimated_duration_minutes: parseInt(e.target.value),
+                    })
+                  }
                   className="pl-10 font-forum"
                 />
               </div>
@@ -917,7 +980,9 @@ export default function Dashboard() {
               {editingItem ? "Edit Shift" : "Schedule New Shift"}
             </DialogTitle>
             <DialogDescription className="font-forum">
-              {editingItem ? "Update shift information" : "Assign driver to bus and route"}
+              {editingItem
+                ? "Update shift information"
+                : "Assign driver to bus and route"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -927,17 +992,21 @@ export default function Dashboard() {
               </Label>
               <Select
                 value={formData.driver_id?.toString() || ""}
-                onValueChange={(value) => setFormData({ ...formData, driver_id: parseInt(value) })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, driver_id: parseInt(value) })
+                }
               >
                 <SelectTrigger className="font-forum">
                   <SelectValue placeholder="Select driver" />
                 </SelectTrigger>
                 <SelectContent>
-                  {drivers.filter(d => d.available).map((driver) => (
-                    <SelectItem key={driver.id} value={driver.id.toString()}>
-                      {driver.name} ({driver.license_number})
-                    </SelectItem>
-                  ))}
+                  {drivers
+                    .filter((d) => d.available)
+                    .map((driver) => (
+                      <SelectItem key={driver.id} value={driver.id.toString()}>
+                        {driver.name} ({driver.license_number})
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -947,7 +1016,9 @@ export default function Dashboard() {
               </Label>
               <Select
                 value={formData.bus_id?.toString() || ""}
-                onValueChange={(value) => setFormData({ ...formData, bus_id: parseInt(value) })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, bus_id: parseInt(value) })
+                }
               >
                 <SelectTrigger className="font-forum">
                   <SelectValue placeholder="Select bus" />
@@ -967,7 +1038,9 @@ export default function Dashboard() {
               </Label>
               <Select
                 value={formData.route_id?.toString() || ""}
-                onValueChange={(value) => setFormData({ ...formData, route_id: parseInt(value) })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, route_id: parseInt(value) })
+                }
               >
                 <SelectTrigger className="font-forum">
                   <SelectValue placeholder="Select route" />
@@ -975,7 +1048,8 @@ export default function Dashboard() {
                 <SelectContent>
                   {routes.map((route) => (
                     <SelectItem key={route.id} value={route.id.toString()}>
-                      {route.origin} → {route.destination} ({route.estimated_duration_minutes}min)
+                      {route.origin} → {route.destination} (
+                      {route.estimated_duration_minutes}min)
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -989,7 +1063,9 @@ export default function Dashboard() {
                 <Input
                   type="date"
                   value={formData.shift_date || ""}
-                  onChange={(e) => setFormData({ ...formData, shift_date: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, shift_date: e.target.value })
+                  }
                   className="font-forum"
                 />
               </div>
@@ -1000,7 +1076,9 @@ export default function Dashboard() {
                 <Input
                   type="time"
                   value={formData.shift_time || ""}
-                  onChange={(e) => setFormData({ ...formData, shift_time: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, shift_time: e.target.value })
+                  }
                   className="font-forum"
                 />
               </div>

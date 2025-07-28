@@ -105,6 +105,10 @@ interface FormData {
   shift_time?: string;
 }
 
+interface ValidationErrors {
+  [key: string]: string;
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("schedule");
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -124,6 +128,10 @@ export default function Dashboard() {
   // Form states
   const [editingItem, setEditingItem] = useState<any>(null);
   const [formData, setFormData] = useState<FormData>({});
+
+  // Validation states
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [dialogError, setDialogError] = useState("");
 
   // Filter states
   const [filterDate, setFilterDate] = useState("");
@@ -156,7 +164,128 @@ export default function Dashboard() {
     }
   };
 
+  // Validation functions
+  const validateDriverForm = (): boolean => {
+    const errors: ValidationErrors = {};
+    
+    if (!formData.name?.trim()) {
+      errors.name = "Driver name is required";
+    }
+    
+    if (!formData.license_number?.trim()) {
+      errors.license_number = "License number is required";
+    } else if (formData.license_number.length < 5) {
+      errors.license_number = "License number must be at least 5 characters";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateBusForm = (): boolean => {
+    const errors: ValidationErrors = {};
+    
+    if (!formData.plate_number?.trim()) {
+      errors.plate_number = "Plate number is required";
+    }
+    
+    if (!formData.capacity || formData.capacity <= 0) {
+      errors.capacity = "Capacity must be greater than 0";
+    } else if (formData.capacity > 100) {
+      errors.capacity = "Capacity cannot exceed 100 passengers";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateRouteForm = (): boolean => {
+    const errors: ValidationErrors = {};
+    
+    if (!formData.origin?.trim()) {
+      errors.origin = "Origin is required";
+    }
+    
+    if (!formData.destination?.trim()) {
+      errors.destination = "Destination is required";
+    }
+    
+    if (formData.origin?.trim() === formData.destination?.trim()) {
+      errors.destination = "Destination must be different from origin";
+    }
+    
+    if (!formData.estimated_duration_minutes || formData.estimated_duration_minutes <= 0) {
+      errors.estimated_duration_minutes = "Duration must be greater than 0";
+    } else if (formData.estimated_duration_minutes > 1440) {
+      errors.estimated_duration_minutes = "Duration cannot exceed 24 hours (1440 minutes)";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateShiftForm = (): boolean => {
+    const errors: ValidationErrors = {};
+    
+    if (!formData.driver_id) {
+      errors.driver_id = "Driver selection is required";
+    }
+    
+    if (!formData.bus_id) {
+      errors.bus_id = "Bus selection is required";
+    }
+    
+    if (!formData.route_id) {
+      errors.route_id = "Route selection is required";
+    }
+    
+    if (!formData.shift_date) {
+      errors.shift_date = "Shift date is required";
+    } else {
+      const selectedDate = new Date(formData.shift_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        errors.shift_date = "Shift date cannot be in the past";
+      }
+    }
+    
+    if (!formData.shift_time) {
+      errors.shift_time = "Shift time is required";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (type: string) => {
+    setDialogError("");
+    setValidationErrors({});
+    
+    // Validate form based on type
+    let isValid = false;
+    switch (type) {
+      case "drivers":
+        isValid = validateDriverForm();
+        break;
+      case "buses":
+        isValid = validateBusForm();
+        break;
+      case "routes":
+        isValid = validateRouteForm();
+        break;
+      case "shifts":
+        isValid = validateShiftForm();
+        break;
+      default:
+        isValid = true;
+    }
+
+    if (!isValid) {
+      setDialogError("Please fix the errors below before submitting");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -229,8 +358,10 @@ export default function Dashboard() {
 
       setFormData({});
       setEditingItem(null);
+      setValidationErrors({});
+      setDialogError("");
     } catch (err: any) {
-      setError(err.message || "Operation failed");
+      setDialogError(err.message || "Operation failed");
     } finally {
       setLoading(false);
     }
@@ -239,6 +370,8 @@ export default function Dashboard() {
   const handleEdit = (type: string, item: any) => {
     setEditingItem(item);
     setFormData(item);
+    setValidationErrors({});
+    setDialogError("");
 
     if (type === "driver") setDriverDialogOpen(true);
     else if (type === "bus") setBusDialogOpen(true);
@@ -277,6 +410,8 @@ export default function Dashboard() {
   const openCreateDialog = (type: string) => {
     setEditingItem(null);
     setFormData({});
+    setValidationErrors({});
+    setDialogError("");
 
     if (type === "driver") setDriverDialogOpen(true);
     else if (type === "bus") setBusDialogOpen(true);
@@ -745,10 +880,20 @@ export default function Dashboard() {
                 : "Enter driver details"}
             </DialogDescription>
           </DialogHeader>
+          
+          {dialogError && (
+            <Alert className="border-error-200 bg-error-50">
+              <AlertCircle className="h-4 w-4 text-error-600" />
+              <AlertDescription className="text-error-700 font-forum">
+                {dialogError}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Full Name
+                Full Name *
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
@@ -758,13 +903,21 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="pl-10 font-forum"
+                  className={cn(
+                    "pl-10 font-forum",
+                    validationErrors.name && "border-error-500 focus:border-error-500"
+                  )}
                 />
               </div>
+              {validationErrors.name && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.name}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                License Number
+                License Number *
               </Label>
               <Input
                 placeholder="Enter license number"
@@ -772,8 +925,16 @@ export default function Dashboard() {
                 onChange={(e) =>
                   setFormData({ ...formData, license_number: e.target.value })
                 }
-                className="font-forum"
+                className={cn(
+                  "font-forum",
+                  validationErrors.license_number && "border-error-500 focus:border-error-500"
+                )}
               />
+              {validationErrors.license_number && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.license_number}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
@@ -793,6 +954,11 @@ export default function Dashboard() {
                   <SelectItem value="false">Unavailable</SelectItem>
                 </SelectContent>
               </Select>
+              {validationErrors.driver_id && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.driver_id}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -828,10 +994,20 @@ export default function Dashboard() {
               {editingItem ? "Update bus information" : "Enter bus details"}
             </DialogDescription>
           </DialogHeader>
+          
+          {dialogError && (
+            <Alert className="border-error-200 bg-error-50">
+              <AlertCircle className="h-4 w-4 text-error-600" />
+              <AlertDescription className="text-error-700 font-forum">
+                {dialogError}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Plate Number
+                Plate Number *
               </Label>
               <div className="relative">
                 <Bus className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
@@ -841,13 +1017,21 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({ ...formData, plate_number: e.target.value })
                   }
-                  className="pl-10 font-forum"
+                  className={cn(
+                    "pl-10 font-forum",
+                    validationErrors.plate_number && "border-error-500 focus:border-error-500"
+                  )}
                 />
               </div>
+              {validationErrors.plate_number && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.plate_number}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Capacity
+                Capacity *
               </Label>
               <Input
                 type="number"
@@ -856,11 +1040,19 @@ export default function Dashboard() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    capacity: parseInt(e.target.value),
+                    capacity: parseInt(e.target.value) || 0,
                   })
                 }
-                className="font-forum"
+                className={cn(
+                  "font-forum",
+                  validationErrors.capacity && "border-error-500 focus:border-error-500"
+                )}
               />
+              {validationErrors.capacity && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.capacity}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -896,10 +1088,20 @@ export default function Dashboard() {
               {editingItem ? "Update route information" : "Enter route details"}
             </DialogDescription>
           </DialogHeader>
+          
+          {dialogError && (
+            <Alert className="border-error-200 bg-error-50">
+              <AlertCircle className="h-4 w-4 text-error-600" />
+              <AlertDescription className="text-error-700 font-forum">
+                {dialogError}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Origin
+                Origin *
               </Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
@@ -909,13 +1111,21 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({ ...formData, origin: e.target.value })
                   }
-                  className="pl-10 font-forum"
+                  className={cn(
+                    "pl-10 font-forum",
+                    validationErrors.origin && "border-error-500 focus:border-error-500"
+                  )}
                 />
               </div>
+              {validationErrors.origin && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.origin}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Destination
+                Destination *
               </Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
@@ -925,13 +1135,21 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({ ...formData, destination: e.target.value })
                   }
-                  className="pl-10 font-forum"
+                  className={cn(
+                    "pl-10 font-forum",
+                    validationErrors.destination && "border-error-500 focus:border-error-500"
+                  )}
                 />
               </div>
+              {validationErrors.destination && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.destination}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Estimated Duration (minutes)
+                Estimated Duration (minutes) *
               </Label>
               <div className="relative">
                 <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
@@ -942,12 +1160,20 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      estimated_duration_minutes: parseInt(e.target.value),
+                      estimated_duration_minutes: parseInt(e.target.value) || 0,
                     })
                   }
-                  className="pl-10 font-forum"
+                  className={cn(
+                    "pl-10 font-forum",
+                    validationErrors.estimated_duration_minutes && "border-error-500 focus:border-error-500"
+                  )}
                 />
               </div>
+              {validationErrors.estimated_duration_minutes && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.estimated_duration_minutes}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -985,6 +1211,16 @@ export default function Dashboard() {
                 : "Assign driver to bus and route"}
             </DialogDescription>
           </DialogHeader>
+          
+          {dialogError && (
+            <Alert className="border-error-200 bg-error-50">
+              <AlertCircle className="h-4 w-4 text-error-600" />
+              <AlertDescription className="text-error-700 font-forum">
+                {dialogError}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
@@ -998,7 +1234,7 @@ export default function Dashboard() {
               >
                 <SelectTrigger className={cn(
                   "font-forum",
-                  !formData.driver_id && "border-error-500"
+                  validationErrors.driver_id && "border-error-500 focus:border-error-500"
                 )}>
                   <SelectValue placeholder="Select driver" />
                 </SelectTrigger>
@@ -1012,6 +1248,11 @@ export default function Dashboard() {
                     ))}
                 </SelectContent>
               </Select>
+              {validationErrors.bus_id && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.bus_id}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
@@ -1025,7 +1266,7 @@ export default function Dashboard() {
               >
                 <SelectTrigger className={cn(
                   "font-forum",
-                  !formData.bus_id && "border-error-500"
+                  validationErrors.bus_id && "border-error-500 focus:border-error-500"
                 )}>
                   <SelectValue placeholder="Select bus" />
                 </SelectTrigger>
@@ -1037,6 +1278,11 @@ export default function Dashboard() {
                   ))}
                 </SelectContent>
               </Select>
+              {validationErrors.route_id && (
+                <p className="text-sm text-error-600 font-forum">
+                  {validationErrors.route_id}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
@@ -1050,7 +1296,7 @@ export default function Dashboard() {
               >
                 <SelectTrigger className={cn(
                   "font-forum",
-                  !formData.route_id && "border-error-500"
+                  validationErrors.route_id && "border-error-500 focus:border-error-500"
                 )}>
                   <SelectValue placeholder="Select route" />
                 </SelectTrigger>
@@ -1077,9 +1323,14 @@ export default function Dashboard() {
                   }
                   className={cn(
                     "font-forum",
-                    !formData.shift_date && "border-error-500"
+                    validationErrors.shift_date && "border-error-500 focus:border-error-500"
                   )}
                 />
+                {validationErrors.shift_date && (
+                  <p className="text-sm text-error-600 font-forum">
+                    {validationErrors.shift_date}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-platinum-800 font-inknut">
@@ -1093,9 +1344,14 @@ export default function Dashboard() {
                   }
                   className={cn(
                     "font-forum",
-                    !formData.shift_time && "border-error-500"
+                    validationErrors.shift_time && "border-error-500 focus:border-error-500"
                   )}
                 />
+                {validationErrors.shift_time && (
+                  <p className="text-sm text-error-600 font-forum">
+                    {validationErrors.shift_time}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -1108,13 +1364,7 @@ export default function Dashboard() {
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                if (!formData.driver_id || !formData.bus_id || !formData.route_id || !formData.shift_date || !formData.shift_time) {
-                  setError("Please fill in all required fields");
-                  return;
-                }
-                handleSubmit("shifts");
-              }}
+              onClick={() => handleSubmit("shifts")}
               disabled={loading}
               className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
             >

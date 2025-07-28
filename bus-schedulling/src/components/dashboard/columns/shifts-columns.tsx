@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import Avatar from "boring-avatars";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Shift } from "../types";
 
@@ -10,7 +11,10 @@ interface ShiftsColumnsProps {
   onDeleteShift: (id: number) => void;
 }
 
-export function createShiftsColumns({ onEditShift, onDeleteShift }: ShiftsColumnsProps): ColumnDef<Shift>[] {
+export function createShiftsColumns({
+  onEditShift,
+  onDeleteShift,
+}: ShiftsColumnsProps): ColumnDef<Shift>[] {
   return [
     {
       accessorKey: "shift_date",
@@ -24,9 +28,22 @@ export function createShiftsColumns({ onEditShift, onDeleteShift }: ShiftsColumn
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="font-forum">{row.getValue("shift_date")}</div>
-      ),
+      cell: ({ row }) => {
+        const date = row.getValue("shift_date") as string;
+        const time = row.getValue("shift_time") as string;
+        const shift = ` ${row.getValue("id")} → ${date} → ${time}`;
+        return (
+          <div className="flex items-center space-x-3">
+            <Avatar
+              name={shift}
+              size={40}
+              variant="ring"
+              colors={["#0a0310", "#49007e", "#ff005b", "#ff7d10", "#ffb238"]}
+            />
+            <div className="font-mono">{row.getValue("shift_date")}</div>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "shift_time",
@@ -60,7 +77,9 @@ export function createShiftsColumns({ onEditShift, onDeleteShift }: ShiftsColumn
       cell: ({ row }) => {
         const shift = row.original;
         return (
-          <div className="font-forum">{shift.bus?.plate_number || "Unknown"}</div>
+          <div className="font-forum">
+            {shift.bus?.plate_number || "Unknown"}
+          </div>
         );
       },
     },

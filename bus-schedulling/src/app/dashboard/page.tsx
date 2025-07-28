@@ -307,7 +307,7 @@ export default function Dashboard() {
 
       const result = await response.json();
 
-      if (type === "driver") {
+      if (type === "drivers") {
         if (editingItem) {
           setDrivers((prev) =>
             prev.map((d) => (d.id === editingItem.id ? result : d))
@@ -318,7 +318,7 @@ export default function Dashboard() {
           setSuccess("Driver created successfully");
         }
         setDriverDialogOpen(false);
-      } else if (type === "bus") {
+      } else if (type === "buses") {
         if (editingItem) {
           setBuses((prev) =>
             prev.map((b) => (b.id === editingItem.id ? result : b))
@@ -329,7 +329,7 @@ export default function Dashboard() {
           setSuccess("Bus created successfully");
         }
         setBusDialogOpen(false);
-      } else if (type === "route") {
+      } else if (type === "routes") {
         if (editingItem) {
           setRoutes((prev) =>
             prev.map((r) => (r.id === editingItem.id ? result : r))
@@ -340,7 +340,7 @@ export default function Dashboard() {
           setSuccess("Route created successfully");
         }
         setRouteDialogOpen(false);
-      } else if (type === "shift") {
+      } else if (type === "shifts") {
         if (editingItem) {
           setShifts((prev) =>
             prev.map((s) => (s.id === editingItem.id ? result : s))

@@ -90,6 +90,7 @@
   --font-family-buenard: var(--font-buenard), serif;
   --font-family-inknut: var(--font-inknut), serif;
   --font-family-forum: var(--font-forum), cursive;
+  --font-family-mono: "SF Mono", SFMono-Regular, ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
   --font-family-sans: var(--font-forum), system-ui, sans-serif;
 
   /* Shadcn/ui Design System Colors */
@@ -183,5 +184,9 @@
 
   .font-forum {
     font-family: var(--font-family-forum);
+  }
+
+  .font-mono {
+    font-family: var(--font-family-mono);
   }
 }

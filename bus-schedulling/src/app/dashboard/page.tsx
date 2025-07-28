@@ -15,12 +15,17 @@ import { ShiftDialog } from "@/components/dashboard/dialogs/shift-dialog";
 import { useDashboardData } from "@/components/dashboard/hooks/use-dashboard-data";
 import { useDialogState } from "@/components/dashboard/hooks/use-dialog-state";
 import { useFormState } from "@/components/dashboard/hooks/use-form-state";
+import { useDeleteMutation } from "@/components/dashboard/hooks/use-dashboard-mutations";
 import {
   DialogState,
   FormData,
   TabType,
   ValidationErrors,
   FilterState,
+  Driver,
+  Bus,
+  Route,
+  Shift,
 } from "@/components/dashboard/types";
 
 export default function Dashboard() {
@@ -30,59 +35,81 @@ export default function Dashboard() {
     filterDriver: "",
     filterBus: "",
   });
+  
   // Custom hooks for state management
   const dashboardData = useDashboardData();
   const dialogState = useDialogState();
   const formState = useFormState();
+  
+  // React Query mutations
+  const deleteMutation = useDeleteMutation();
+  
+  // State for success/error messages
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fix for onFilterChange - create a wrapper function that merges partial updates
   const handleFilterChange = (filters: Partial<FilterState>) => {
     setFilterState((prev) => ({ ...prev, ...filters }));
   };
 
-  const handleEdit = (type: string, item: any) => {
+  const handleEdit = (type: string, item: Driver | Bus | Route | Shift) => {
     formState.setEditingItem(item);
-    formState.setFormData(item);
+    
+    // Convert the item to FormData format
+    let formData: FormData = {};
+    
+    if (type === "drivers" || type === "driver") {
+      const driver = item as Driver;
+      formData = {
+        name: driver.name,
+        license_number: driver.license_number,
+        available: driver.available,
+      };
+    } else if (type === "buses" || type === "bus") {
+      const bus = item as Bus;
+      formData = {
+        plate_number: bus.plate_number,
+        capacity: bus.capacity,
+      };
+    } else if (type === "routes" || type === "route") {
+      const route = item as Route;
+      formData = {
+        origin: route.origin,
+        destination: route.destination,
+        estimated_duration_minutes: route.estimated_duration_minutes,
+      };
+    } else if (type === "shifts" || type === "shift") {
+      const shift = item as Shift;
+      formData = {
+        driver_id: shift.driver_id,
+        bus_id: shift.bus_id,
+        route_id: shift.route_id,
+        shift_date: shift.shift_date,
+        shift_time: shift.shift_time,
+      };
+    }
+    
+    formState.setFormData(formData);
     formState.setValidationErrors({});
     formState.setDialogError("");
 
-    if (type === "drivers") dialogState.setDriverDialogOpen(true);
-    else if (type === "buses") dialogState.setBusDialogOpen(true);
-    else if (type === "routes") dialogState.setRouteDialogOpen(true);
-    else if (type === "shifts") dialogState.setShiftDialogOpen(true);
+    if (type === "drivers" || type === "driver") dialogState.setDriverDialogOpen(true);
+    else if (type === "buses" || type === "bus") dialogState.setBusDialogOpen(true);
+    else if (type === "routes" || type === "route") dialogState.setRouteDialogOpen(true);
+    else if (type === "shifts" || type === "shift") dialogState.setShiftDialogOpen(true);
   };
 
   const handleDelete = async (type: string, id: number) => {
     if (!confirm("Are you sure you want to delete this item?")) return;
 
     try {
-      const response = await fetch(`/api/${type}?id=${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Delete failed");
-      }
-
-      if (type === "driver") {
-        dashboardData.setDrivers(
-          dashboardData.drivers.filter((d) => d.id !== id)
-        );
-      } else if (type === "bus") {
-        dashboardData.setBuses(dashboardData.buses.filter((b) => b.id !== id));
-      } else if (type === "route") {
-        dashboardData.setRoutes(
-          dashboardData.routes.filter((r) => r.id !== id)
-        );
-      } else if (type === "shift") {
-        dashboardData.setShifts(
-          dashboardData.shifts.filter((s) => s.id !== id)
-        );
-      }
-      dashboardData.setSuccess("Item deleted successfully");
+      await deleteMutation.mutateAsync({ type, id });
+      setSuccessMessage("Item deleted successfully");
+      setErrorMessage("");
     } catch (err: any) {
-      dashboardData.setError(err.message || "Delete failed");
+      setErrorMessage(err.message || "Delete failed");
+      setSuccessMessage("");
     }
   };
 
@@ -117,8 +144,8 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AlertMessages
-          error={dashboardData.error}
-          success={dashboardData.success}
+          error={dashboardData.error || errorMessage}
+          success={successMessage}
         />
 
         <DashboardTabs activeTab={activeTab} onTabChange={setActiveTab} />

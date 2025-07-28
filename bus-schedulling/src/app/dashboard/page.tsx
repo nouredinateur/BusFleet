@@ -165,7 +165,7 @@ export default function Dashboard() {
       const method = editingItem ? "PUT" : "POST";
       const body = editingItem ? { id: editingItem.id, ...formData } : formData;
 
-      const response = await fetch(`/api/${type}s`, {
+      const response = await fetch(`/api/${type}`, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -804,7 +804,7 @@ export default function Dashboard() {
               Cancel
             </Button>
             <Button
-              onClick={() => handleSubmit("driver")}
+              onClick={() => handleSubmit("drivers")}
               disabled={loading}
               className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
             >
@@ -872,7 +872,7 @@ export default function Dashboard() {
               Cancel
             </Button>
             <Button
-              onClick={() => handleSubmit("bus")}
+              onClick={() => handleSubmit("buses")}
               disabled={loading}
               className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
             >
@@ -959,7 +959,7 @@ export default function Dashboard() {
               Cancel
             </Button>
             <Button
-              onClick={() => handleSubmit("route")}
+              onClick={() => handleSubmit("routes")}
               disabled={loading}
               className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
             >
@@ -1113,7 +1113,7 @@ export default function Dashboard() {
                   setError("Please fill in all required fields");
                   return;
                 }
-                handleSubmit("shift");
+                handleSubmit("shifts");
               }}
               disabled={loading}
               className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"

@@ -59,6 +59,11 @@ export function createBusesColumns({
       cell: ({ row }) => (
         <div className="font-mono">{row.getValue("capacity")} passengers</div>
       ),
+      filterFn: (row, id, value) => {
+        if (!value || value === "all") return true;
+        const capacity = row.getValue(id) as number;
+        return capacity.toString() === value;
+      },
     },
     {
       id: "actions",

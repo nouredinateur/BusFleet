@@ -45,6 +45,11 @@ export function createRoutesColumns({
           </div>
         );
       },
+      filterFn: (row, id, value) => {
+        if (!value || value === "all") return true;
+        const origin = row.getValue(id) as string;
+        return origin === value;
+      },
     },
     {
       accessorKey: "destination",
@@ -61,6 +66,11 @@ export function createRoutesColumns({
       cell: ({ row }) => (
         <div className="font-mono">{row.getValue("destination")}</div>
       ),
+      filterFn: (row, id, value) => {
+        if (!value || value === "all") return true;
+        const destination = row.getValue(id) as string;
+        return destination === value;
+      },
     },
     {
       accessorKey: "estimated_duration_minutes",
@@ -79,6 +89,23 @@ export function createRoutesColumns({
           {row.getValue("estimated_duration_minutes")} minutes
         </div>
       ),
+      filterFn: (row, id, value) => {
+        if (!value || value === "all") return true;
+        const duration = row.getValue(id) as number;
+        
+        switch (value) {
+          case "under-30":
+            return duration < 30;
+          case "30-60":
+            return duration >= 30 && duration <= 60;
+          case "60-120":
+            return duration > 60 && duration <= 120;
+          case "over-120":
+            return duration > 120;
+          default:
+            return true;
+        }
+      },
     },
     {
       id: "actions",

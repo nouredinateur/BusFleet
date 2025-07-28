@@ -988,7 +988,7 @@ export default function Dashboard() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Driver
+                Driver *
               </Label>
               <Select
                 value={formData.driver_id?.toString() || ""}
@@ -996,7 +996,10 @@ export default function Dashboard() {
                   setFormData({ ...formData, driver_id: parseInt(value) })
                 }
               >
-                <SelectTrigger className="font-forum">
+                <SelectTrigger className={cn(
+                  "font-forum",
+                  !formData.driver_id && "border-error-500"
+                )}>
                   <SelectValue placeholder="Select driver" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1012,7 +1015,7 @@ export default function Dashboard() {
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Bus
+                Bus *
               </Label>
               <Select
                 value={formData.bus_id?.toString() || ""}
@@ -1020,7 +1023,10 @@ export default function Dashboard() {
                   setFormData({ ...formData, bus_id: parseInt(value) })
                 }
               >
-                <SelectTrigger className="font-forum">
+                <SelectTrigger className={cn(
+                  "font-forum",
+                  !formData.bus_id && "border-error-500"
+                )}>
                   <SelectValue placeholder="Select bus" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1034,7 +1040,7 @@ export default function Dashboard() {
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Route
+                Route *
               </Label>
               <Select
                 value={formData.route_id?.toString() || ""}
@@ -1042,7 +1048,10 @@ export default function Dashboard() {
                   setFormData({ ...formData, route_id: parseInt(value) })
                 }
               >
-                <SelectTrigger className="font-forum">
+                <SelectTrigger className={cn(
+                  "font-forum",
+                  !formData.route_id && "border-error-500"
+                )}>
                   <SelectValue placeholder="Select route" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1058,7 +1067,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                  Shift Date
+                  Shift Date *
                 </Label>
                 <Input
                   type="date"
@@ -1066,12 +1075,15 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({ ...formData, shift_date: e.target.value })
                   }
-                  className="font-forum"
+                  className={cn(
+                    "font-forum",
+                    !formData.shift_date && "border-error-500"
+                  )}
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                  Shift Time
+                  Shift Time *
                 </Label>
                 <Input
                   type="time"
@@ -1079,7 +1091,10 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({ ...formData, shift_time: e.target.value })
                   }
-                  className="font-forum"
+                  className={cn(
+                    "font-forum",
+                    !formData.shift_time && "border-error-500"
+                  )}
                 />
               </div>
             </div>
@@ -1093,7 +1108,13 @@ export default function Dashboard() {
               Cancel
             </Button>
             <Button
-              onClick={() => handleSubmit("shift")}
+              onClick={() => {
+                if (!formData.driver_id || !formData.bus_id || !formData.route_id || !formData.shift_date || !formData.shift_time) {
+                  setError("Please fill in all required fields");
+                  return;
+                }
+                handleSubmit("shift");
+              }}
               disabled={loading}
               className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
             >

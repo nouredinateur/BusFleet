@@ -168,7 +168,7 @@ export function ScheduleViewer({
 
       {/* Shifts Table */}
       <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-6">
+        <CardContent className="px-6">
           <DataTable
             columns={columns}
             data={getFilteredShifts()}

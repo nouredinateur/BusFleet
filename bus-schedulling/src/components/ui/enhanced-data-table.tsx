@@ -164,7 +164,7 @@ export function EnhancedDataTable<TData, TValue>({
             <CardTitle className="font-buenard">{title}</CardTitle>
           </CardHeader>
         )}
-        <CardContent className="p-6">
+        <CardContent className="px-6">
           <div className="rounded-md border-0">
             <Table>
               <TableHeader>

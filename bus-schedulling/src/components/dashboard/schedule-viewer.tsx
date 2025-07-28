@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Filter } from "lucide-react";
+import { Plus, Filter } from "lucide-react";
 import { Driver, Bus, Route, Shift, FilterState } from "./types";
+import { DataTable } from "@/components/ui/data-table";
+import { createShiftsColumns } from "./columns/shifts-columns";
 
 interface ScheduleViewerProps {
   shifts: Shift[];
@@ -39,6 +40,8 @@ export function ScheduleViewer({
       return true;
     });
   };
+
+  const columns = createShiftsColumns({ onEditShift, onDeleteShift });
 
   return (
     <div className="space-y-6">
@@ -124,66 +127,13 @@ export function ScheduleViewer({
 
       {/* Shifts Table */}
       <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-inknut">Date</TableHead>
-                <TableHead className="font-inknut">Time</TableHead>
-                <TableHead className="font-inknut">Driver</TableHead>
-                <TableHead className="font-inknut">Bus</TableHead>
-                <TableHead className="font-inknut">Route</TableHead>
-                <TableHead className="font-inknut">Duration</TableHead>
-                <TableHead className="font-inknut">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {getFilteredShifts().map((shift) => (
-                <TableRow key={shift.id}>
-                  <TableCell className="font-forum">
-                    {shift.shift_date}
-                  </TableCell>
-                  <TableCell className="font-forum">
-                    {shift.shift_time}
-                  </TableCell>
-                  <TableCell className="font-forum">
-                    {shift.driver?.name || "Unknown"}
-                  </TableCell>
-                  <TableCell className="font-forum">
-                    {shift.bus?.plate_number || "Unknown"}
-                  </TableCell>
-                  <TableCell className="font-forum">
-                    {shift.route
-                      ? `${shift.route.origin} → ${shift.route.destination}`
-                      : "Unknown"}
-                  </TableCell>
-                  <TableCell className="font-forum">
-                    {shift.route?.estimated_duration_minutes || 0} min
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEditShift(shift)}
-                        className="text-persian-blue-600 hover:text-persian-blue-700"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onDeleteShift(shift.id)}
-                        className="text-error-600 hover:text-error-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="p-6">
+          <DataTable
+            columns={columns}
+            data={getFilteredShifts()}
+            searchKey="shift_date"
+            searchPlaceholder="Search by date..."
+          />
         </CardContent>
       </Card>
     </div>

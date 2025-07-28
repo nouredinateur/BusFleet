@@ -153,6 +153,7 @@ describe("AuthForm", () => {
         password: "password123",
         age: 18,
       }),
+      credentials: "include",
     });
   });
 

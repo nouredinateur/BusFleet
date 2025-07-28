@@ -1,9 +1,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Bus } from "./types";
+import { DataTable } from "@/components/ui/data-table";
+import { createBusesColumns } from "./columns/buses-columns";
 
 interface BusesManagementProps {
   buses: Bus[];
@@ -18,6 +19,8 @@ export function BusesManagement({
   onEditBus,
   onDeleteBus,
 }: BusesManagementProps) {
+  const columns = createBusesColumns({ onEditBus, onDeleteBus });
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -34,48 +37,13 @@ export function BusesManagement({
       </div>
 
       <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-inknut">Plate Number</TableHead>
-                <TableHead className="font-inknut">Capacity</TableHead>
-                <TableHead className="font-inknut">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {buses.map((bus) => (
-                <TableRow key={bus.id}>
-                  <TableCell className="font-forum">
-                    {bus.plate_number}
-                  </TableCell>
-                  <TableCell className="font-forum">
-                    {bus.capacity} passengers
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEditBus(bus)}
-                        className="text-persian-blue-600 hover:text-persian-blue-700"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onDeleteBus(bus.id)}
-                        className="text-error-600 hover:text-error-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="p-6">
+          <DataTable
+            columns={columns}
+            data={buses}
+            searchKey="plate_number"
+            searchPlaceholder="Search buses..."
+          />
         </CardContent>
       </Card>
     </div>

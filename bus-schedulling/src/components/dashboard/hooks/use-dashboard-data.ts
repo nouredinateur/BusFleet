@@ -1,79 +1,53 @@
-import { useState, useEffect } from "react";
-import { DashboardState, Driver, Bus, Route, Shift } from "../types";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDrivers, fetchBuses, fetchRoutes, fetchShifts } from "@/lib/api";
 
 export function useDashboardData() {
-  const [state, setState] = useState<DashboardState>({
-    drivers: [],
-    buses: [],
-    routes: [],
-    shifts: [],
-    loading: false,
-    error: "",
-    success: "",
+  const {
+    data: drivers = [],
+    isLoading: driversLoading,
+    error: driversError,
+  } = useQuery({
+    queryKey: ["drivers"],
+    queryFn: fetchDrivers,
   });
 
-  const setLoading = (loading: boolean) => {
-    setState(prev => ({ ...prev, loading }));
-  };
+  const {
+    data: buses = [],
+    isLoading: busesLoading,
+    error: busesError,
+  } = useQuery({
+    queryKey: ["buses"],
+    queryFn: fetchBuses,
+  });
 
-  const setError = (error: string) => {
-    setState(prev => ({ ...prev, error }));
-  };
+  const {
+    data: routes = [],
+    isLoading: routesLoading,
+    error: routesError,
+  } = useQuery({
+    queryKey: ["routes"],
+    queryFn: fetchRoutes,
+  });
 
-  const setSuccess = (success: string) => {
-    setState(prev => ({ ...prev, success }));
-  };
+  const {
+    data: shifts = [],
+    isLoading: shiftsLoading,
+    error: shiftsError,
+  } = useQuery({
+    queryKey: ["shifts"],
+    queryFn: fetchShifts,
+  });
 
-  const setDrivers = (drivers: Driver[]) => {
-    setState(prev => ({ ...prev, drivers }));
-  };
-
-  const setBuses = (buses: Bus[]) => {
-    setState(prev => ({ ...prev, buses }));
-  };
-
-  const setRoutes = (routes: Route[]) => {
-    setState(prev => ({ ...prev, routes }));
-  };
-
-  const setShifts = (shifts: Shift[]) => {
-    setState(prev => ({ ...prev, shifts }));
-  };
-
-  const loadAllData = async () => {
-    setLoading(true);
-    try {
-      const [driversRes, busesRes, routesRes, shiftsRes] = await Promise.all([
-        fetch("/api/drivers"),
-        fetch("/api/buses"),
-        fetch("/api/routes"),
-        fetch("/api/shifts"),
-      ]);
-
-      if (driversRes.ok) setDrivers(await driversRes.json());
-      if (busesRes.ok) setBuses(await busesRes.json());
-      if (routesRes.ok) setRoutes(await routesRes.json());
-      if (shiftsRes.ok) setShifts(await shiftsRes.json());
-    } catch (err) {
-      setError("Failed to load data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAllData();
-  }, []);
+  const loading = driversLoading || busesLoading || routesLoading || shiftsLoading;
+  const error = driversError || busesError || routesError || shiftsError;
 
   return {
-    ...state,
-    setLoading,
-    setError,
-    setSuccess,
-    setDrivers,
-    setBuses,
-    setRoutes,
-    setShifts,
-    loadAllData,
+    drivers,
+    buses,
+    routes,
+    shifts,
+    loading,
+    error: error?.message || "",
+    success: "", // You can manage success messages separately
   };
 }

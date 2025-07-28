@@ -8,8 +8,12 @@ export function DashboardHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
-            <div >
-              <img src="/markoub.png" alt="Markoub Logo" className="w-16 h-16" />
+            <div>
+              <img
+                src="/markoub.png"
+                alt="Markoub Logo"
+                className="w-16 h-16"
+              />
             </div>
             <div>
               <h1 className="text-xl font-buenard font-bold text-platinum-900">
@@ -22,7 +26,7 @@ export function DashboardHeader() {
           </div>
           <Button
             variant="outline"
-            className="text-platinum-700 hover:text-error-600 hover:border-error-300 font-inknut"
+            className="text-platinum-700 hover:text-black hover:border-error-500 font-inknut"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout

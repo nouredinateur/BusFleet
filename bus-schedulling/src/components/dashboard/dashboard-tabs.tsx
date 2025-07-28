@@ -17,7 +17,7 @@ const tabs: Tab[] = [
 
 export function DashboardTabs({ activeTab, onTabChange }: DashboardTabsProps) {
   return (
-    <div className="flex space-x-1 mb-8 bg-white/60 backdrop-blur-sm p-1 rounded-xl border border-platinum-200">
+    <div className="flex space-x-1 mb-8 bg-white/60 backdrop-blur-sm p-1 rounded-xl border border-gray-200">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         return (
@@ -27,8 +27,8 @@ export function DashboardTabs({ activeTab, onTabChange }: DashboardTabsProps) {
             className={cn(
               "flex items-center space-x-2 px-4 py-3 rounded-lg font-medium font-inknut transition-all duration-200",
               activeTab === tab.id
-                ? "bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 text-white shadow-lg"
-                : "text-platinum-700 hover:bg-white/80 hover:text-persian-blue-600"
+                ? "bg-black-950 text-white shadow-lg"
+                : "text-gray-700 hover:bg-white/80 hover:text-orange-600"
             )}
           >
             <Icon className="w-4 h-4" />

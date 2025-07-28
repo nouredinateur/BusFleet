@@ -182,7 +182,7 @@ export default function AuthForm() {
           }
 
           window.location.href = "/dashboard";
-        }, 1000);
+        }, 600);
       } else {
         setSuccess("Account created successfully! Please sign in.");
         setTimeout(() => {
@@ -219,8 +219,14 @@ export default function AuthForm() {
         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm w-[400px]">
           <CardHeader className="space-y-6 text-center pb-8">
             {/* Brand Logo */}
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-persian-blue-500 to-dark-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Bus className="w-8 h-8 text-white" />
+            <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center">
+              <div>
+                <img
+                  src="/markoub.png"
+                  alt="Markoub Logo"
+                  className="w-16 h-16"
+                />
+              </div>{" "}
             </div>
 
             {/* Title and Description */}
@@ -464,7 +470,7 @@ export default function AuthForm() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-11 bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-medium text-base font-inknut shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50 focus:ring-2 focus:ring-persian-blue-400 focus:ring-offset-2"
+                className="w-full h-11 bg-black-950 text-white shadow-lg  hover:from-persian-blue-600 hover:to-dark-cyan-600 font-medium text-base font-inknut transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50 focus:ring-2 focus:ring-persian-blue-400 focus:ring-offset-2"
                 disabled={loading}
               >
                 {loading ? (
@@ -486,7 +492,7 @@ export default function AuthForm() {
 
             {/* Toggle Mode */}
             <div className="text-center space-y-3">
-              <p className="text-sm text-platinum-700 font-forum">
+              <p className="text-sm text-platinum-700 font-forum ">
                 {isLogin
                   ? "Don't have an account?"
                   : "Already have an account?"}
@@ -494,7 +500,7 @@ export default function AuthForm() {
               <Button
                 variant="ghost"
                 onClick={toggleMode}
-                className="text-persian-blue-500 hover:text-persian-blue-600 hover:bg-persian-blue-50 font-medium font-inknut transition-all duration-200 focus:ring-2 focus:ring-persian-blue-400"
+                className="text-persian-blue-500 hover:text-persian-blue-600 hover:bg-persian-blue-50 font-medium font-inknut transition-all duration-200 focus:ring-2 focus:ring-persian-blue-400 hover:bg-white/80 hover:text-orange-600"
                 disabled={loading}
               >
                 {isLogin ? "Create Account" : "Sign In"}

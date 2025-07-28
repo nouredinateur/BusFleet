@@ -1,8 +1,36 @@
+"use client";
+
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Bus, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { useUser } from "@/contexts/user-context";
 
 export function DashboardHeader() {
+  const router = useRouter();
+  const { user, setUser } = useUser();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        // Clear user from context
+        setUser(null);
+        
+        // Redirect to login page
+        router.push("/login");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-platinum-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,13 +52,21 @@ export function DashboardHeader() {
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            className="cursor-pointer text-platinum-700 hover:text-accent font-bold hover:bg-black  font-inknut"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center space-x-4">
+            {user && (
+              <div className="text-sm text-platinum-600">
+                Welcome, <span className="font-medium">{user.name}</span>
+              </div>
+            )}
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="cursor-pointer text-platinum-700 hover:text-accent font-bold hover:bg-black font-inknut"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
     </header>

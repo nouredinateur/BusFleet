@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useUser } from "@/contexts/user-context";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { AlertMessages } from "@/components/dashboard/alert-messages";
@@ -29,6 +30,7 @@ import {
 } from "@/components/dashboard/types";
 
 export default function Dashboard() {
+  const { user, permissions, loading } = useUser();
   const [activeTab, setActiveTab] = useState<TabType>("schedule");
   const [filterState, setFilterState] = useState<FilterState>({
     filterDate: "",
@@ -47,6 +49,24 @@ export default function Dashboard() {
   // State for success/error messages
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
+        <div className="text-lg">Please log in to access the dashboard.</div>
+      </div>
+    );
+  }
 
   // Fix for onFilterChange - create a wrapper function that merges partial updates
   const handleFilterChange = (filters: Partial<FilterState>) => {
@@ -157,9 +177,9 @@ export default function Dashboard() {
             drivers={dashboardData.drivers}
             buses={dashboardData.buses}
             routes={dashboardData.routes}
-            onCreateShift={() => openCreateDialog("shift")}
-            onEditShift={(shift) => handleEdit("shift", shift)}
-            onDeleteShift={(id) => handleDelete("shifts", id)}
+            onCreateShift={permissions.canCreate ? () => openCreateDialog("shift") : () => {}}
+            onEditShift={permissions.canEdit ? (shift) => handleEdit("shift", shift) : () => {}}
+            onDeleteShift={permissions.canDelete ? (id) => handleDelete("shifts", id) : () => {}}
             filterState={filterState}
             onFilterChange={handleFilterChange}
           />
@@ -168,82 +188,90 @@ export default function Dashboard() {
         {activeTab === "drivers" && (
           <DriversManagement
             drivers={dashboardData.drivers}
-            onCreateDriver={() => openCreateDialog("driver")}
-            onEditDriver={(driver) => handleEdit("driver", driver)}
-            onDeleteDriver={(id) => handleDelete("drivers", id)}
+            onCreateDriver={permissions.canCreate ? () => openCreateDialog("driver") : () => {}}
+            onEditDriver={permissions.canEdit ? (driver) => handleEdit("driver", driver) : () => {}}
+            onDeleteDriver={permissions.canDelete ? (id) => handleDelete("drivers", id) : () => {}}
           />
         )}
 
         {activeTab === "buses" && (
           <BusesManagement
             buses={dashboardData.buses}
-            onCreateBus={() => openCreateDialog("bus")}
-            onEditBus={(bus) => handleEdit("bus", bus)}
-            onDeleteBus={(id) => handleDelete("buses", id)}
+            onCreateBus={permissions.canCreate ? () => openCreateDialog("bus") : () => {}}
+            onEditBus={permissions.canEdit ? (bus) => handleEdit("bus", bus) : () => {}}
+            onDeleteBus={permissions.canDelete ? (id) => handleDelete("buses", id) : () => {}}
           />
         )}
 
         {activeTab === "routes" && (
           <RoutesManagement
             routes={dashboardData.routes}
-            onCreateRoute={() => openCreateDialog("route")}
-            onEditRoute={(route) => handleEdit("route", route)}
-            onDeleteRoute={(id) => handleDelete("routes", id)}
+            onCreateRoute={permissions.canCreate ? () => openCreateDialog("route") : () => {}}
+            onEditRoute={permissions.canEdit ? (route) => handleEdit("route", route) : () => {}}
+            onDeleteRoute={permissions.canDelete ? (id) => handleDelete("routes", id) : () => {}}
           />
         )}
       </div>
 
-      {/* Dialogs */}
-      <DriverDialog
-        open={dialogState.driverDialogOpen}
-        onOpenChange={dialogState.setDriverDialogOpen}
-        editingItem={formState.editingItem}
-        formData={formState.formData}
-        onFormDataChange={formState.updateFormData}
-        validationErrors={formState.validationErrors}
-        dialogError={formState.dialogError}
-        loading={dashboardData.loading}
-        onSubmit={handleDriverSubmit}
-      />
+      {/* Dialogs - only show if user has permissions */}
+      {(permissions.canCreate || permissions.canEdit) && (
+        <DriverDialog
+          open={dialogState.driverDialogOpen}
+          onOpenChange={dialogState.setDriverDialogOpen}
+          editingItem={formState.editingItem}
+          formData={formState.formData}
+          onFormDataChange={formState.updateFormData}
+          validationErrors={formState.validationErrors}
+          dialogError={formState.dialogError}
+          loading={dashboardData.loading}
+          onSubmit={handleDriverSubmit}
+        />
+      )}
 
-      <BusDialog
-        open={dialogState.busDialogOpen}
-        onOpenChange={dialogState.setBusDialogOpen}
-        editingItem={formState.editingItem}
-        formData={formState.formData}
-        onFormDataChange={formState.updateFormData}
-        validationErrors={formState.validationErrors}
-        dialogError={formState.dialogError}
-        loading={dashboardData.loading}
-        onSubmit={handleBusSubmit}
-      />
+      {(permissions.canCreate || permissions.canEdit) && (
+        <BusDialog
+          open={dialogState.busDialogOpen}
+          onOpenChange={dialogState.setBusDialogOpen}
+          editingItem={formState.editingItem}
+          formData={formState.formData}
+          onFormDataChange={formState.updateFormData}
+          validationErrors={formState.validationErrors}
+          dialogError={formState.dialogError}
+          loading={dashboardData.loading}
+          onSubmit={handleBusSubmit}
+        />
+      )}
 
-      <RouteDialog
-        open={dialogState.routeDialogOpen}
-        onOpenChange={dialogState.setRouteDialogOpen}
-        editingItem={formState.editingItem}
-        formData={formState.formData}
-        onFormDataChange={formState.updateFormData}
-        validationErrors={formState.validationErrors}
-        dialogError={formState.dialogError}
-        loading={dashboardData.loading}
-        onSubmit={handleRouteSubmit}
-      />
+      {(permissions.canCreate || permissions.canEdit) && (
+        <RouteDialog
+          open={dialogState.routeDialogOpen}
+          onOpenChange={dialogState.setRouteDialogOpen}
+          editingItem={formState.editingItem}
+          formData={formState.formData}
+          onFormDataChange={formState.updateFormData}
+          validationErrors={formState.validationErrors}
+          dialogError={formState.dialogError}
+          loading={dashboardData.loading}
+          onSubmit={handleRouteSubmit}
+        />
+      )}
 
-      <ShiftDialog
-        open={dialogState.shiftDialogOpen}
-        onOpenChange={dialogState.setShiftDialogOpen}
-        editingItem={formState.editingItem}
-        formData={formState.formData}
-        onFormDataChange={formState.updateFormData}
-        validationErrors={formState.validationErrors}
-        dialogError={formState.dialogError}
-        loading={dashboardData.loading}
-        onSubmit={handleShiftSubmit}
-        drivers={dashboardData.drivers}
-        buses={dashboardData.buses}
-        routes={dashboardData.routes}
-      />
+      {(permissions.canCreate || permissions.canEdit) && (
+        <ShiftDialog
+          open={dialogState.shiftDialogOpen}
+          onOpenChange={dialogState.setShiftDialogOpen}
+          editingItem={formState.editingItem}
+          formData={formState.formData}
+          onFormDataChange={formState.updateFormData}
+          validationErrors={formState.validationErrors}
+          dialogError={formState.dialogError}
+          loading={dashboardData.loading}
+          onSubmit={handleShiftSubmit}
+          drivers={dashboardData.drivers}
+          buses={dashboardData.buses}
+          routes={dashboardData.routes}
+        />
+      )}
     </div>
   );
 }

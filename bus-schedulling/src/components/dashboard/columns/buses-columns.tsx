@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import Avatar from "boring-avatars";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Bus } from "../types";
 
@@ -10,7 +11,10 @@ interface BusesColumnsProps {
   onDeleteBus: (id: number) => void;
 }
 
-export function createBusesColumns({ onEditBus, onDeleteBus }: BusesColumnsProps): ColumnDef<Bus>[] {
+export function createBusesColumns({
+  onEditBus,
+  onDeleteBus,
+}: BusesColumnsProps): ColumnDef<Bus>[] {
   return [
     {
       accessorKey: "plate_number",
@@ -20,13 +24,25 @@ export function createBusesColumns({ onEditBus, onDeleteBus }: BusesColumnsProps
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-inknut hover:bg-transparent"
         >
-          Plate Number
+          Bus
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="font-forum">{row.getValue("plate_number")}</div>
-      ),
+      cell: ({ row }) => {
+        const plateNumber = row.getValue("plate_number") as string;
+        return (
+          <div className="flex items-center space-x-3">
+            <Avatar
+              name={plateNumber}
+              size={40}
+              variant="beam"
+              colors={["#0a0310", "#49007e", "#ff005b", "#ff7d10", "#ffb238"]}
+              square
+            />
+            <div className="font-mono">{plateNumber}</div>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "capacity",
@@ -41,7 +57,7 @@ export function createBusesColumns({ onEditBus, onDeleteBus }: BusesColumnsProps
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="font-forum">{row.getValue("capacity")} passengers</div>
+        <div className="font-mono">{row.getValue("capacity")} passengers</div>
       ),
     },
     {

@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Avatar from "boring-avatars";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Driver } from "../types";
 
@@ -11,7 +12,10 @@ interface DriversColumnsProps {
   onDeleteDriver: (id: number) => void;
 }
 
-export function createDriversColumns({ onEditDriver, onDeleteDriver }: DriversColumnsProps): ColumnDef<Driver>[] {
+export function createDriversColumns({
+  onEditDriver,
+  onDeleteDriver,
+}: DriversColumnsProps): ColumnDef<Driver>[] {
   return [
     {
       accessorKey: "name",
@@ -21,13 +25,24 @@ export function createDriversColumns({ onEditDriver, onDeleteDriver }: DriversCo
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-inknut hover:bg-transparent"
         >
-          Name
+          Driver
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="font-forum">{row.getValue("name")}</div>
-      ),
+      cell: ({ row }) => {
+        const name = row.getValue("name") as string;
+        return (
+          <div className="flex items-center space-x-3">
+            <Avatar
+              name={name}
+              size={40}
+              variant="beam"
+              colors={["#1e40af", "#0d9488", "#047857", "#f59e0b", "#ef4444"]}
+            />
+            <div className="font-mono">{name}</div>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "license_number",
@@ -42,7 +57,7 @@ export function createDriversColumns({ onEditDriver, onDeleteDriver }: DriversCo
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="font-forum">{row.getValue("license_number")}</div>
+        <div className="font-mono">{row.getValue("license_number")}</div>
       ),
     },
     {

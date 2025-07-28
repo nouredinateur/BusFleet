@@ -1,9 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Driver } from "./types";
-import { DataTable } from "@/components/ui/data-table";
+import { EnhancedDataTable } from "@/components/ui/enhanced-data-table";
 import { createDriversColumns } from "./columns/drivers-columns";
 
 interface DriversManagementProps {
@@ -21,6 +20,19 @@ export function DriversManagement({
 }: DriversManagementProps) {
   const columns = createDriversColumns({ onEditDriver, onDeleteDriver });
 
+  const columnFilters = [
+    {
+      columnId: "available",
+      label: "Status",
+      type: "select" as const,
+      options: [
+        { label: "Available", value: "available" },
+        { label: "Unavailable", value: "unavailable" },
+      ],
+      placeholder: "All statuses",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -36,16 +48,13 @@ export function DriversManagement({
         </Button>
       </div>
 
-      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-6">
-          <DataTable
-            columns={columns}
-            data={drivers}
-            searchKey="name"
-            searchPlaceholder="Search drivers..."
-          />
-        </CardContent>
-      </Card>
+      <EnhancedDataTable
+        columns={columns}
+        data={drivers}
+        searchKey="name"
+        searchPlaceholder="Search drivers..."
+        columnFilters={columnFilters}
+      />
     </div>
   );
 }

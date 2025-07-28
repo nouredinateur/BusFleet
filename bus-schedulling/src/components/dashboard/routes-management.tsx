@@ -1,9 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Route } from "./types";
-import { DataTable } from "@/components/ui/data-table";
+import { EnhancedDataTable } from "@/components/ui/enhanced-data-table";
 import { createRoutesColumns } from "./columns/routes-columns";
 
 interface RoutesManagementProps {
@@ -21,6 +20,51 @@ export function RoutesManagement({
 }: RoutesManagementProps) {
   const columns = createRoutesColumns({ onEditRoute, onDeleteRoute });
 
+  // Create dynamic filter options based on actual data
+  const originOptions = React.useMemo(() => {
+    const origins = [...new Set(routes.map(route => route.origin))].sort();
+    return origins.map(origin => ({
+      label: origin,
+      value: origin,
+    }));
+  }, [routes]);
+
+  const destinationOptions = React.useMemo(() => {
+    const destinations = [...new Set(routes.map(route => route.destination))].sort();
+    return destinations.map(destination => ({
+      label: destination,
+      value: destination,
+    }));
+  }, [routes]);
+
+  // Create duration range options
+  const durationOptions = React.useMemo(() => {
+    const durations = [...new Set(routes.map(route => route.estimated_duration_minutes))].sort((a, b) => a - b);
+    return [
+      { label: "Under 30 min", value: "under-30" },
+      { label: "30-60 min", value: "30-60" },
+      { label: "60-120 min", value: "60-120" },
+      { label: "Over 120 min", value: "over-120" },
+    ];
+  }, [routes]);
+
+  const columnFilters = [
+    {
+      columnId: "origin",
+      label: "Origin",
+      type: "select" as const,
+      options: originOptions,
+      placeholder: "All origins",
+    },
+    {
+      columnId: "destination",
+      label: "Destination",
+      type: "select" as const,
+      options: destinationOptions,
+      placeholder: "All destinations",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -36,16 +80,13 @@ export function RoutesManagement({
         </Button>
       </div>
 
-      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-6">
-          <DataTable
-            columns={columns}
-            data={routes}
-            searchKey="origin"
-            searchPlaceholder="Search routes..."
-          />
-        </CardContent>
-      </Card>
+      <EnhancedDataTable
+        columns={columns}
+        data={routes}
+        searchKey="origin"
+        searchPlaceholder="Search routes..."
+        columnFilters={columnFilters}
+      />
     </div>
   );
 }

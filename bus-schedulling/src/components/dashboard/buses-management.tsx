@@ -1,9 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Bus } from "./types";
-import { DataTable } from "@/components/ui/data-table";
+import { EnhancedDataTable } from "@/components/ui/enhanced-data-table";
 import { createBusesColumns } from "./columns/buses-columns";
 
 interface BusesManagementProps {
@@ -21,6 +20,25 @@ export function BusesManagement({
 }: BusesManagementProps) {
   const columns = createBusesColumns({ onEditBus, onDeleteBus });
 
+  // Create capacity range options
+  const capacityOptions = React.useMemo(() => {
+    const capacities = [...new Set(buses.map(bus => bus.capacity))].sort((a, b) => a - b);
+    return capacities.map(capacity => ({
+      label: `${capacity} passengers`,
+      value: capacity.toString(),
+    }));
+  }, [buses]);
+
+  const columnFilters = [
+    {
+      columnId: "capacity",
+      label: "Capacity",
+      type: "select" as const,
+      options: capacityOptions,
+      placeholder: "All capacities",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -36,16 +54,13 @@ export function BusesManagement({
         </Button>
       </div>
 
-      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-6">
-          <DataTable
-            columns={columns}
-            data={buses}
-            searchKey="plate_number"
-            searchPlaceholder="Search buses..."
-          />
-        </CardContent>
-      </Card>
+      <EnhancedDataTable
+        columns={columns}
+        data={buses}
+        searchKey="plate_number"
+        searchPlaceholder="Search buses..."
+        columnFilters={columnFilters}
+      />
     </div>
   );
 }

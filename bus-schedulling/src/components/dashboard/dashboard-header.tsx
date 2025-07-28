@@ -8,8 +8,8 @@ export function DashboardHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-persian-blue-500 to-dark-cyan-500 rounded-xl flex items-center justify-center">
-              <Bus className="w-6 h-6 text-white" />
+            <div >
+              <img src="/markoub.png" alt="Markoub Logo" className="w-16 h-16" />
             </div>
             <div>
               <h1 className="text-xl font-buenard font-bold text-platinum-900">

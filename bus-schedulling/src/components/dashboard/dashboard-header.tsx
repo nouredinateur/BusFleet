@@ -26,7 +26,7 @@ export function DashboardHeader() {
           </div>
           <Button
             variant="outline"
-            className="text-platinum-700 hover:text-black hover:border-error-500 font-inknut"
+            className="text-platinum-700 hover:text-accent font-bold hover:bg-black  font-inknut"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout

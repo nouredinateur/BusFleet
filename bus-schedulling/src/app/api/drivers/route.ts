@@ -3,11 +3,18 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { driversTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { checkPermission, createUnauthorizedResponse } from "@/lib/permissions";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Check view permission
+  const { authorized, error } = await checkPermission(request, 'canView');
+  if (!authorized) {
+    return createUnauthorizedResponse(error || "Unauthorized");
+  }
+
   try {
     const drivers = await db.select().from(driversTable);
     return NextResponse.json(drivers);
@@ -20,6 +27,12 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Check create permission
+  const { authorized, error } = await checkPermission(request, 'canCreate');
+  if (!authorized) {
+    return createUnauthorizedResponse(error || "Unauthorized");
+  }
+
   try {
     const body = await request.json();
     const { name, license_number, available } = body;
@@ -46,6 +59,12 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  // Check edit permission
+  const { authorized, error } = await checkPermission(request, 'canEdit');
+  if (!authorized) {
+    return createUnauthorizedResponse(error || "Unauthorized");
+  }
+
   try {
     const body = await request.json();
     const { id, name, license_number, available } = body;
@@ -80,6 +99,17 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  // Check delete permission
+  const { authorized, error, user } = await checkPermission(request, 'canDelete');
+  if (!authorized) {
+    return createUnauthorizedResponse(error || "Unauthorized");
+  }
+
+  // Additional check: dispatchers cannot delete users or buses
+  if (user.role === 'dispatcher') {
+    return createUnauthorizedResponse("Dispatchers cannot delete drivers");
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

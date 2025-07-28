@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { sign } from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { usersTable } from "@/db/schema";
+import { usersTable, userRolesTable, rolesTable } from "@/db/schema";
 import bcrypt from "bcrypt";
 
 export async function POST(request: Request) {
@@ -20,10 +20,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find user by email
-    const user = await db.query.usersTable.findFirst({
-      where: eq(usersTable.email, email),
-    });
+    // Find user by email with role information
+    const userWithRole = await db
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        email: usersTable.email,
+        password: usersTable.password,
+        roleName: rolesTable.name,
+        roleId: rolesTable.id,
+      })
+      .from(usersTable)
+      .leftJoin(userRolesTable, eq(usersTable.id, userRolesTable.user_id))
+      .leftJoin(rolesTable, eq(userRolesTable.role_id, rolesTable.id))
+      .where(eq(usersTable.email, email))
+      .limit(1);
+
+    const user = userWithRole[0];
 
     if (!user) {
       console.log(`❌ User not found: ${email}`);
@@ -43,18 +56,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate JWT token
+    // Generate JWT token with role information
     const token = sign(
       {
         userId: user.id,
         email: user.email,
+        role: user.roleName || 'viewer', // Default to viewer if no role assigned
+        roleId: user.roleId,
       },
       process.env.JWT_SECRET || "secretkey",
       { expiresIn: "1d" }
     );
 
-    console.log(`✅ Login successful for: ${email}`);
-    console.log(`🍪 Setting token: ${token.substring(0, 20)}...`);
+    console.log(`✅ Login successful for: ${email} with role: ${user.roleName}`);
 
     // Create response
     const response = NextResponse.json({
@@ -63,19 +77,18 @@ export async function POST(request: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.roleName || 'viewer',
       },
     });
 
     // Set cookie with more permissive settings for development
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Set to false for development (localhost)
-      sameSite: "lax", // Changed from "strict" to "lax" for better compatibility
-      maxAge: 60 * 60 * 24, // 24 hours
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24,
       path: "/",
     });
-
-    console.log(`🍪 Cookie set successfully`);
 
     return response;
   } catch (error) {

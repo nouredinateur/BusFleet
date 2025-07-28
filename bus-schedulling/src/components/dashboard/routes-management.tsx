@@ -1,9 +1,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Route } from "./types";
+import { DataTable } from "@/components/ui/data-table";
+import { createRoutesColumns } from "./columns/routes-columns";
 
 interface RoutesManagementProps {
   routes: Route[];
@@ -18,6 +19,8 @@ export function RoutesManagement({
   onEditRoute,
   onDeleteRoute,
 }: RoutesManagementProps) {
+  const columns = createRoutesColumns({ onEditRoute, onDeleteRoute });
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -34,50 +37,13 @@ export function RoutesManagement({
       </div>
 
       <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-inknut">Origin</TableHead>
-                <TableHead className="font-inknut">Destination</TableHead>
-                <TableHead className="font-inknut">Duration</TableHead>
-                <TableHead className="font-inknut">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {routes.map((route) => (
-                <TableRow key={route.id}>
-                  <TableCell className="font-forum">{route.origin}</TableCell>
-                  <TableCell className="font-forum">
-                    {route.destination}
-                  </TableCell>
-                  <TableCell className="font-forum">
-                    {route.estimated_duration_minutes} minutes
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEditRoute(route)}
-                        className="text-persian-blue-600 hover:text-persian-blue-700"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onDeleteRoute(route.id)}
-                        className="text-error-600 hover:text-error-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="p-6">
+          <DataTable
+            columns={columns}
+            data={routes}
+            searchKey="origin"
+            searchPlaceholder="Search routes..."
+          />
         </CardContent>
       </Card>
     </div>

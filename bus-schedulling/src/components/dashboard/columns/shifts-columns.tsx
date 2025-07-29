@@ -5,17 +5,20 @@ import { Button } from "@/components/ui/button";
 import Avatar from "boring-avatars";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Shift } from "../types";
+import { UserPermissions } from "@/lib/permissions";
 
 interface ShiftsColumnsProps {
   onEditShift: (shift: Shift) => void;
   onDeleteShift: (id: number) => void;
+  permissions: UserPermissions;
 }
 
 export function createShiftsColumns({
   onEditShift,
   onDeleteShift,
+  permissions,
 }: ShiftsColumnsProps): ColumnDef<Shift>[] {
-  return [
+  const columns: ColumnDef<Shift>[] = [
     {
       accessorKey: "shift_date",
       header: ({ column }) => (
@@ -31,7 +34,7 @@ export function createShiftsColumns({
       cell: ({ row }) => {
         const date = row.getValue("shift_date") as string;
         const time = row.getValue("shift_time") as string;
-        const shift = ` ${row.getValue("id")} → ${date} → ${time}`;
+        const shift = `${date} → ${time}`;
         return (
           <div className="flex items-center space-x-3">
             <Avatar
@@ -109,32 +112,42 @@ export function createShiftsColumns({
         );
       },
     },
-    {
+  ];
+
+  // Only add actions column if user has edit or delete permissions
+  if (permissions.canEdit || permissions.canDelete) {
+    columns.push({
       id: "actions",
       header: "Actions",
       cell: ({ row }) => {
         const shift = row.original;
         return (
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEditShift(shift)}
-              className="text-persian-blue-600 hover:text-persian-blue-700"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDeleteShift(shift.id)}
-              className="text-error-600 hover:text-error-700"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {permissions.canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEditShift(shift)}
+                className="text-persian-blue-600 hover:text-persian-blue-700"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            )}
+            {permissions.canDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDeleteShift(shift.id)}
+                className="text-error-600 hover:text-error-700"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         );
       },
-    },
-  ];
+    });
+  }
+
+  return columns;
 }

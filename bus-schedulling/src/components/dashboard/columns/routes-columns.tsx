@@ -5,17 +5,20 @@ import { Button } from "@/components/ui/button";
 import Avatar from "boring-avatars";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Route } from "../types";
+import { UserPermissions } from "@/lib/permissions";
 
 interface RoutesColumnsProps {
   onEditRoute: (route: Route) => void;
   onDeleteRoute: (id: number) => void;
+  permissions: UserPermissions;
 }
 
 export function createRoutesColumns({
   onEditRoute,
   onDeleteRoute,
+  permissions,
 }: RoutesColumnsProps): ColumnDef<Route>[] {
-  return [
+  const columns: ColumnDef<Route>[] = [
     {
       accessorKey: "origin",
       header: ({ column }) => (
@@ -107,32 +110,42 @@ export function createRoutesColumns({
         }
       },
     },
-    {
+  ];
+
+  // Only add actions column if user has edit or delete permissions
+  if (permissions.canEdit || permissions.canDelete) {
+    columns.push({
       id: "actions",
       header: "Actions",
       cell: ({ row }) => {
         const route = row.original;
         return (
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEditRoute(route)}
-              className="text-persian-blue-600 hover:text-persian-blue-700"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDeleteRoute(route.id)}
-              className="text-error-600 hover:text-error-700"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {permissions.canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEditRoute(route)}
+                className="text-persian-blue-600 hover:text-persian-blue-700"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            )}
+            {permissions.canDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDeleteRoute(route.id)}
+                className="text-error-600 hover:text-error-700"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         );
       },
-    },
-  ];
+    });
+  }
+
+  return columns;
 }

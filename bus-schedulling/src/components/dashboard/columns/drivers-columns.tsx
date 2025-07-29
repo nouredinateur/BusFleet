@@ -6,17 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import Avatar from "boring-avatars";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Driver } from "../types";
+import { UserPermissions } from "@/lib/permissions";
 
 interface DriversColumnsProps {
   onEditDriver: (driver: Driver) => void;
   onDeleteDriver: (id: number) => void;
+  permissions: UserPermissions;
 }
 
 export function createDriversColumns({
   onEditDriver,
   onDeleteDriver,
+  permissions,
 }: DriversColumnsProps): ColumnDef<Driver>[] {
-  return [
+  const columns: ColumnDef<Driver>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -77,32 +80,42 @@ export function createDriversColumns({
         return value === "available" ? available : !available;
       },
     },
-    {
+  ];
+
+  // Only add actions column if user has edit or delete permissions
+  if (permissions.canEdit || permissions.canDelete) {
+    columns.push({
       id: "actions",
       header: "Actions",
       cell: ({ row }) => {
         const driver = row.original;
         return (
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEditDriver(driver)}
-              className="text-persian-blue-600 hover:text-persian-blue-700"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDeleteDriver(driver.id)}
-              className="text-error-600 hover:text-error-700"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {permissions.canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEditDriver(driver)}
+                className="text-persian-blue-600 hover:text-persian-blue-700"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            )}
+            {permissions.canDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDeleteDriver(driver.id)}
+                className="text-error-600 hover:text-error-700"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         );
       },
-    },
-  ];
+    });
+  }
+
+  return columns;
 }

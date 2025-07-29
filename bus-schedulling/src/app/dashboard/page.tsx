@@ -50,7 +50,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-persian-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black mx-auto"></div>
           <p className="mt-4 text-platinum-600 font-inknut">
             Loading dashboard...
           </p>

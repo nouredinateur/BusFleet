@@ -17,7 +17,15 @@ import { useDashboardData } from "@/components/dashboard/hooks/use-dashboard-dat
 import { useDialogState } from "@/components/dashboard/hooks/use-dialog-state";
 import { useFormState } from "@/components/dashboard/hooks/use-form-state";
 import { useDeleteMutation } from "@/components/dashboard/hooks/use-dashboard-mutations";
-import { TabType, FilterState, Driver, Bus, Route, Shift, FormData } from "@/components/dashboard/types";
+import {
+  TabType,
+  FilterState,
+  Driver,
+  Bus,
+  Route,
+  Shift,
+  FormData,
+} from "@/components/dashboard/types";
 
 export default function Dashboard() {
   const { user, permissions, loading } = useUser();
@@ -27,7 +35,7 @@ export default function Dashboard() {
     filterDriver: "",
     filterBus: "",
   });
-  
+
   // Custom hooks for state management
   const dashboardData = useDashboardData();
   const dialogState = useDialogState();
@@ -43,7 +51,9 @@ export default function Dashboard() {
       <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-persian-blue-600 mx-auto"></div>
-          <p className="mt-4 text-platinum-600 font-inknut">Loading dashboard...</p>
+          <p className="mt-4 text-platinum-600 font-inknut">
+            Loading dashboard...
+          </p>
         </div>
       </div>
     );
@@ -53,7 +63,9 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-platinum-600 font-inknut">Please log in to access the dashboard.</p>
+          <p className="text-platinum-600 font-inknut">
+            Please log in to access the dashboard.
+          </p>
         </div>
       </div>
     );
@@ -69,10 +81,10 @@ export default function Dashboard() {
     if (!permissions.canEdit) return;
 
     formState.setEditingItem(item);
-    
+
     // Convert the item to FormData format
     let formData: FormData = {};
-    
+
     if (type === "drivers" || type === "driver") {
       const driver = item as Driver;
       formData = {
@@ -103,22 +115,24 @@ export default function Dashboard() {
         shift_time: shift.shift_time,
       };
     }
-    
+
     formState.setFormData(formData);
     formState.setValidationErrors({});
     formState.setDialogError("");
 
-    if (type === "drivers" || type === "driver") dialogState.setDriverDialogOpen(true);
-    else if (type === "buses" || type === "bus") dialogState.setBusDialogOpen(true);
-    else if (type === "routes" || type === "route") dialogState.setRouteDialogOpen(true);
-    else if (type === "shifts" || type === "shift") dialogState.setShiftDialogOpen(true);
+    if (type === "drivers" || type === "driver")
+      dialogState.setDriverDialogOpen(true);
+    else if (type === "buses" || type === "bus")
+      dialogState.setBusDialogOpen(true);
+    else if (type === "routes" || type === "route")
+      dialogState.setRouteDialogOpen(true);
+    else if (type === "shifts" || type === "shift")
+      dialogState.setShiftDialogOpen(true);
   };
 
   const handleDelete = async (type: string, id: number) => {
     // Only allow delete if user has permission
     if (!permissions.canDelete) return;
-
-    if (!confirm("Are you sure you want to delete this item?")) return;
 
     try {
       await deleteMutation.mutateAsync({ type, id });

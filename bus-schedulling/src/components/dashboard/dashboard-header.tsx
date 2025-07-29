@@ -9,7 +9,6 @@ import { useUser } from "@/contexts/user-context";
 export function DashboardHeader() {
   const router = useRouter();
   const { user, setUser } = useUser();
-
   const handleLogout = async () => {
     try {
       const response = await fetch("/api/logout", {
@@ -20,7 +19,7 @@ export function DashboardHeader() {
       if (response.ok) {
         // Clear user from context
         setUser(null);
-        
+
         // Redirect to login page
         router.push("/login");
       } else {
@@ -55,7 +54,8 @@ export function DashboardHeader() {
           <div className="flex items-center space-x-4">
             {user && (
               <div className="text-sm text-platinum-600">
-                Welcome, <span className="font-medium">{user.name}</span>
+                Welcome,{" "}
+                <span className=" text-black font-medium">{user.name}</span>
               </div>
             )}
             <Button

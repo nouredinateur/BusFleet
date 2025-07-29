@@ -6,6 +6,7 @@ import Avatar from "boring-avatars";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Route } from "../types";
 import { UserPermissions } from "@/lib/permissions";
+import { GenericActionButtons } from "./generic-action-buttons";
 
 interface RoutesColumnsProps {
   onEditRoute: (route: Route) => void;
@@ -95,7 +96,7 @@ export function createRoutesColumns({
       filterFn: (row, id, value) => {
         if (!value || value === "all") return true;
         const duration = row.getValue(id) as number;
-        
+
         switch (value) {
           case "under-30":
             return duration < 30;
@@ -120,28 +121,17 @@ export function createRoutesColumns({
       cell: ({ row }) => {
         const route = row.original;
         return (
-          <div className="flex space-x-2">
-            {permissions.canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEditRoute(route)}
-                className="text-persian-blue-600 hover:text-persian-blue-700"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-            )}
-            {permissions.canDelete && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDeleteRoute(route.id)}
-                className="text-error-600 hover:text-error-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
+          <GenericActionButtons
+            item={route}
+            onEdit={() => onEditRoute(route)}
+            onDelete={() => onDeleteRoute(route.id)}
+            permissions={permissions}
+            deleteConfirmation={{
+              title: "Delete Route",
+              getDescription: () =>
+                `Are you sure you want to delete this route? This action cannot be undone.`,
+            }}
+          />
         );
       },
     });

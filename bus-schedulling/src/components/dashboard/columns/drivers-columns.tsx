@@ -4,9 +4,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Avatar from "boring-avatars";
-import { Edit, Trash2, ArrowUpDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Driver } from "../types";
 import { UserPermissions } from "@/lib/permissions";
+import { GenericActionButtons } from "./generic-action-buttons";
 
 interface DriversColumnsProps {
   onEditDriver: (driver: Driver) => void;
@@ -90,28 +91,17 @@ export function createDriversColumns({
       cell: ({ row }) => {
         const driver = row.original;
         return (
-          <div className="flex space-x-2">
-            {permissions.canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEditDriver(driver)}
-                className="text-persian-blue-600 hover:text-persian-blue-700"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-            )}
-            {permissions.canDelete && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDeleteDriver(driver.id)}
-                className="text-error-600 hover:text-error-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
+          <GenericActionButtons
+            item={driver}
+            onEdit={onEditDriver}
+            onDelete={onDeleteDriver}
+            permissions={permissions}
+            deleteConfirmation={{
+              title: "Delete Driver",
+              getDescription: (driver) => 
+                `Are you sure you want to delete driver ${driver.name}? This action cannot be undone.`,
+            }}
+          />
         );
       },
     });

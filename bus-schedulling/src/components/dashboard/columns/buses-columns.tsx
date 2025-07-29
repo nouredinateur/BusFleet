@@ -3,9 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import Avatar from "boring-avatars";
-import { Edit, Trash2, ArrowUpDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Bus } from "../types";
 import { UserPermissions } from "@/lib/permissions";
+import { GenericActionButtons } from "./generic-action-buttons";
 
 interface BusesColumnsProps {
   onEditBus: (bus: Bus) => void;
@@ -78,28 +79,17 @@ export function createBusesColumns({
       cell: ({ row }) => {
         const bus = row.original;
         return (
-          <div className="flex space-x-2">
-            {permissions.canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEditBus(bus)}
-                className="text-persian-blue-600 hover:text-persian-blue-700"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-            )}
-            {permissions.canDelete && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDeleteBus(bus.id)}
-                className="text-error-600 hover:text-error-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
+          <GenericActionButtons
+            item={bus}
+            onEdit={onEditBus}
+            onDelete={onDeleteBus}
+            permissions={permissions}
+            deleteConfirmation={{
+              title: "Delete Bus",
+              getDescription: (bus) =>
+                `Are you sure you want to delete bus ${bus.plate_number}? This action cannot be undone.`,
+            }}
+          />
         );
       },
     });

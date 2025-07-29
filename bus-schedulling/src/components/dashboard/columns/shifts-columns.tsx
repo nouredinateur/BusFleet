@@ -3,9 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import Avatar from "boring-avatars";
-import { Edit, Trash2, ArrowUpDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Shift } from "../types";
 import { UserPermissions } from "@/lib/permissions";
+import { GenericActionButtons } from "./generic-action-buttons";
 
 interface ShiftsColumnsProps {
   onEditShift: (shift: Shift) => void;
@@ -122,28 +123,19 @@ export function createShiftsColumns({
       cell: ({ row }) => {
         const shift = row.original;
         return (
-          <div className="flex space-x-2">
-            {permissions.canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEditShift(shift)}
-                className="text-persian-blue-600 hover:text-persian-blue-700"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-            )}
-            {permissions.canDelete && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDeleteShift(shift.id)}
-                className="text-error-600 hover:text-error-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
+          <GenericActionButtons
+            item={shift}
+            onEdit={onEditShift}
+            onDelete={onDeleteShift}
+            permissions={permissions}
+            deleteConfirmation={{
+              title: "Delete Shift",
+              getDescription: (shift) => {
+                const shiftInfo = `${shift.shift_date} at ${shift.shift_time}`;
+                return `Are you sure you want to delete the shift on ${shiftInfo}? This action cannot be undone.`;
+              },
+            }}
+          />
         );
       },
     });

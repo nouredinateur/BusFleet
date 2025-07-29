@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
+import bcrypt from "bcrypt";
 import "dotenv/config";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -226,18 +227,16 @@ function generateRandomTime(): string {
     .padStart(2, "0"); // 15-minute intervals
   return `${hours}:${minutes}:00`;
 }
-
 async function main() {
   console.log("Starting database seeding...");
 
-  // Clear existing data (optional - uncomment if needed)
-  // await db.delete(schema.shiftsTable);
-  // await db.delete(schema.userRolesTable);
-  // await db.delete(schema.driversTable);
-  // await db.delete(schema.busesTable);
-  // await db.delete(schema.routesTable);
-  // await db.delete(schema.usersTable);
-  // await db.delete(schema.rolesTable);
+  await db.delete(schema.shiftsTable);
+  await db.delete(schema.userRolesTable);
+  await db.delete(schema.driversTable);
+  await db.delete(schema.busesTable);
+  await db.delete(schema.routesTable);
+  await db.delete(schema.usersTable);
+  await db.delete(schema.rolesTable);
 
   // Seed roles
   console.log("Seeding roles...");
@@ -252,16 +251,60 @@ async function main() {
     ])
     .returning();
 
-  // Seed 100 users
-  console.log("Seeding users...");
+  // Create specific test users with known credentials
+  console.log("Creating test users with hashed passwords...");
+  const saltRounds = 10;
+
+  const testUsers = [
+    {
+      name: "Admin User",
+      age: 35,
+      email: "admin@test.com",
+      password: await bcrypt.hash("admin123", saltRounds),
+      role: "admin",
+    },
+    {
+      name: "Dispatcher User",
+      age: 30,
+      email: "dispatcher@test.com",
+      password: await bcrypt.hash("dispatcher123", saltRounds),
+      role: "dispatcher",
+    },
+    {
+      name: "Viewer User",
+      age: 28,
+      email: "viewer@test.com",
+      password: await bcrypt.hash("viewer123", saltRounds),
+      role: "viewer",
+    },
+  ];
+
+  // Seed additional random users
+  console.log("Seeding additional users...");
   const userValues = [];
-  for (let i = 0; i < 100; i++) {
+
+  // Add test users first
+  for (const testUser of testUsers) {
+    userValues.push({
+      name: testUser.name,
+      age: testUser.age,
+      email: testUser.email,
+      password: testUser.password,
+    });
+  }
+
+  // Add random users
+  for (let i = 0; i < 97; i++) {
+    // 97 + 3 test users = 100 total
     const name = generateRandomName();
+    const plainPassword = `password${i + 1}`;
+    const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
+
     userValues.push({
       name,
-      age: Math.floor(Math.random() * 40) + 25, // Age between 25-65
+      age: Math.floor(Math.random() * 40) + 25,
       email: generateEmail(name),
-      password: `hashedpassword${i + 1}`,
+      password: hashedPassword,
     });
   }
 
@@ -270,18 +313,48 @@ async function main() {
     .values(userValues)
     .returning();
 
-  // Seed user_roles (assign random roles to users)
+  // Seed user_roles with guaranteed test users
   console.log("Seeding user roles...");
   const userRoleValues = [];
-  for (const user of users) {
+
+  // Assign specific roles to test users (first 3 users)
+  const requiredRoles = ["admin", "dispatcher", "viewer"];
+  for (let i = 0; i < requiredRoles.length; i++) {
+    const role = roles.find((r) => r.name === requiredRoles[i]);
+    if (role) {
+      userRoleValues.push({
+        user_id: users[i].id,
+        role_id: role.id,
+      });
+    }
+  }
+
+  // Assign random roles to remaining users
+  for (let i = 3; i < users.length; i++) {
     const randomRole = roles[Math.floor(Math.random() * roles.length)];
     userRoleValues.push({
-      user_id: user.id,
+      user_id: users[i].id,
       role_id: randomRole.id,
     });
   }
 
   await db.insert(schema.userRolesTable).values(userRoleValues);
+
+  // Log test user credentials
+  console.log("\n🔑 Test Users Created:");
+  console.log("====================");
+  testUsers.forEach((user, index) => {
+    const plainPassword =
+      user.role === "admin"
+        ? "admin123"
+        : user.role === "dispatcher"
+        ? "dispatcher123"
+        : "viewer123";
+    console.log(
+      `${user.role.toUpperCase()}: ${user.email} | Password: ${plainPassword}`
+    );
+  });
+  console.log("====================\n");
 
   // Seed 100 drivers
   console.log("Seeding drivers...");

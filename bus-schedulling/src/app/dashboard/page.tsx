@@ -17,17 +17,7 @@ import { useDashboardData } from "@/components/dashboard/hooks/use-dashboard-dat
 import { useDialogState } from "@/components/dashboard/hooks/use-dialog-state";
 import { useFormState } from "@/components/dashboard/hooks/use-form-state";
 import { useDeleteMutation } from "@/components/dashboard/hooks/use-dashboard-mutations";
-import {
-  DialogState,
-  FormData,
-  TabType,
-  ValidationErrors,
-  FilterState,
-  Driver,
-  Bus,
-  Route,
-  Shift,
-} from "@/components/dashboard/types";
+import { TabType, FilterState, Driver, Bus, Route, Shift, FormData } from "@/components/dashboard/types";
 
 export default function Dashboard() {
   const { user, permissions, loading } = useUser();
@@ -42,28 +32,29 @@ export default function Dashboard() {
   const dashboardData = useDashboardData();
   const dialogState = useDialogState();
   const formState = useFormState();
-  
-  // React Query mutations
   const deleteMutation = useDeleteMutation();
-  
-  // State for success/error messages
+
+  // Local state for success/error messages
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Show loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-persian-blue-600 mx-auto"></div>
+          <p className="mt-4 text-platinum-600 font-inknut">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  // Show login prompt if not authenticated
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
-        <div className="text-lg">Please log in to access the dashboard.</div>
+        <div className="text-center">
+          <p className="text-platinum-600 font-inknut">Please log in to access the dashboard.</p>
+        </div>
       </div>
     );
   }
@@ -74,6 +65,9 @@ export default function Dashboard() {
   };
 
   const handleEdit = (type: string, item: Driver | Bus | Route | Shift) => {
+    // Only allow edit if user has permission
+    if (!permissions.canEdit) return;
+
     formState.setEditingItem(item);
     
     // Convert the item to FormData format
@@ -121,6 +115,9 @@ export default function Dashboard() {
   };
 
   const handleDelete = async (type: string, id: number) => {
+    // Only allow delete if user has permission
+    if (!permissions.canDelete) return;
+
     if (!confirm("Are you sure you want to delete this item?")) return;
 
     try {
@@ -134,6 +131,9 @@ export default function Dashboard() {
   };
 
   const openCreateDialog = (type: string) => {
+    // Only allow create if user has permission
+    if (!permissions.canCreate) return;
+
     formState.setEditingItem(null);
     formState.setFormData({});
     formState.setValidationErrors({});
@@ -177,38 +177,42 @@ export default function Dashboard() {
             drivers={dashboardData.drivers}
             buses={dashboardData.buses}
             routes={dashboardData.routes}
-            onCreateShift={permissions.canCreate ? () => openCreateDialog("shift") : () => {}}
-            onEditShift={permissions.canEdit ? (shift) => handleEdit("shift", shift) : () => {}}
-            onDeleteShift={permissions.canDelete ? (id) => handleDelete("shifts", id) : () => {}}
+            onCreateShift={() => openCreateDialog("shift")}
+            onEditShift={(shift) => handleEdit("shift", shift)}
+            onDeleteShift={(id) => handleDelete("shifts", id)}
             filterState={filterState}
             onFilterChange={handleFilterChange}
+            permissions={permissions}
           />
         )}
 
         {activeTab === "drivers" && (
           <DriversManagement
             drivers={dashboardData.drivers}
-            onCreateDriver={permissions.canCreate ? () => openCreateDialog("driver") : () => {}}
-            onEditDriver={permissions.canEdit ? (driver) => handleEdit("driver", driver) : () => {}}
-            onDeleteDriver={permissions.canDelete ? (id) => handleDelete("drivers", id) : () => {}}
+            onCreateDriver={() => openCreateDialog("driver")}
+            onEditDriver={(driver) => handleEdit("driver", driver)}
+            onDeleteDriver={(id) => handleDelete("drivers", id)}
+            permissions={permissions}
           />
         )}
 
         {activeTab === "buses" && (
           <BusesManagement
             buses={dashboardData.buses}
-            onCreateBus={permissions.canCreate ? () => openCreateDialog("bus") : () => {}}
-            onEditBus={permissions.canEdit ? (bus) => handleEdit("bus", bus) : () => {}}
-            onDeleteBus={permissions.canDelete ? (id) => handleDelete("buses", id) : () => {}}
+            onCreateBus={() => openCreateDialog("bus")}
+            onEditBus={(bus) => handleEdit("bus", bus)}
+            onDeleteBus={(id) => handleDelete("buses", id)}
+            permissions={permissions}
           />
         )}
 
         {activeTab === "routes" && (
           <RoutesManagement
             routes={dashboardData.routes}
-            onCreateRoute={permissions.canCreate ? () => openCreateDialog("route") : () => {}}
-            onEditRoute={permissions.canEdit ? (route) => handleEdit("route", route) : () => {}}
-            onDeleteRoute={permissions.canDelete ? (id) => handleDelete("routes", id) : () => {}}
+            onCreateRoute={() => openCreateDialog("route")}
+            onEditRoute={(route) => handleEdit("route", route)}
+            onDeleteRoute={(id) => handleDelete("routes", id)}
+            permissions={permissions}
           />
         )}
       </div>

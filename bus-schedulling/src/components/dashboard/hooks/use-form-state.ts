@@ -8,6 +8,7 @@ import {
   validateRouteForm, 
   validateShiftForm 
 } from "../utils/validation";
+import { useCreateMutation, useUpdateMutation } from "./use-dashboard-mutations";
 
 export function useFormState() {
   const [formState, setFormState] = useState<FormState>({
@@ -17,6 +18,9 @@ export function useFormState() {
     dialogError: "",
   });
 
+  const createMutation = useCreateMutation();
+  const updateMutation = useUpdateMutation();
+
   const setEditingItem = (item: any) => {
     setFormState(prev => ({ ...prev, editingItem: item }));
   };
@@ -25,7 +29,6 @@ export function useFormState() {
     setFormState(prev => ({ ...prev, formData: data }));
   };
 
-  // Add a function that accepts partial form data updates
   const updateFormData = (data: Partial<FormData>) => {
     setFormState(prev => ({ 
       ...prev, 
@@ -68,100 +71,33 @@ export function useFormState() {
       return;
     }
 
-    dashboardData.setLoading(true);
-    dashboardData.setError("");
-    dashboardData.setSuccess("");
-
     try {
-      const method = formState.editingItem ? "PUT" : "POST";
-      const body = formState.editingItem 
-        ? { id: formState.editingItem.id, ...formState.formData } 
-        : formState.formData;
-
-      const response = await fetch(`/api/${type}`, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Operation failed");
+      if (formState.editingItem) {
+        // Update existing item
+        const updateData = { id: formState.editingItem.id, ...formState.formData };
+        await updateMutation.mutateAsync({ type, data: updateData });
+        dashboardData.setSuccess(`${type.slice(0, -1)} updated successfully`);
+      } else {
+        // Create new item
+        await createMutation.mutateAsync({ type, data: formState.formData });
+        dashboardData.setSuccess(`${type.slice(0, -1)} created successfully`);
       }
 
-      const result = await response.json();
-
-      // Update the appropriate data based on type
-      if (type === "drivers") {
-        if (formState.editingItem) {
-          dashboardData.setDrivers(
-            dashboardData.drivers.map((d: any) => 
-              d.id === formState.editingItem.id ? result : d
-            )
-          );
-          dashboardData.setSuccess("Driver updated successfully");
-        } else {
-          dashboardData.setDrivers([...dashboardData.drivers, result]);
-          dashboardData.setSuccess("Driver created successfully");
-        }
-        dialogState.setDriverDialogOpen(false);
-      } else if (type === "buses") {
-        if (formState.editingItem) {
-          dashboardData.setBuses(
-            dashboardData.buses.map((b: any) => 
-              b.id === formState.editingItem.id ? result : b
-            )
-          );
-          dashboardData.setSuccess("Bus updated successfully");
-        } else {
-          dashboardData.setBuses([...dashboardData.buses, result]);
-          dashboardData.setSuccess("Bus created successfully");
-        }
-        dialogState.setBusDialogOpen(false);
-      } else if (type === "routes") {
-        if (formState.editingItem) {
-          dashboardData.setRoutes(
-            dashboardData.routes.map((r: any) => 
-              r.id === formState.editingItem.id ? result : r
-            )
-          );
-          dashboardData.setSuccess("Route updated successfully");
-        } else {
-          dashboardData.setRoutes([...dashboardData.routes, result]);
-          dashboardData.setSuccess("Route created successfully");
-        }
-        dialogState.setRouteDialogOpen(false);
-      } else if (type === "shifts") {
-        if (formState.editingItem) {
-          dashboardData.setShifts(
-            dashboardData.shifts.map((s: any) => 
-              s.id === formState.editingItem.id ? result : s
-            )
-          );
-          dashboardData.setSuccess("Shift updated successfully");
-        } else {
-          dashboardData.setShifts([...dashboardData.shifts, result]);
-          dashboardData.setSuccess("Shift created successfully");
-        }
-        dialogState.setShiftDialogOpen(false);
-        
-        // Reload shifts to get the populated data
-        const shiftsRes = await fetch("/api/shifts");
-        if (shiftsRes.ok) {
-          const shifts = await shiftsRes.json();
-          dashboardData.setShifts(shifts);
-        }
-      }
+      // Close the appropriate dialog
+      if (type === "drivers") dialogState.setDriverDialogOpen(false);
+      else if (type === "buses") dialogState.setBusDialogOpen(false);
+      else if (type === "routes") dialogState.setRouteDialogOpen(false);
+      else if (type === "shifts") dialogState.setShiftDialogOpen(false);
 
       // Reset form state
       setFormData({});
       setEditingItem(null);
       setValidationErrors({});
       setDialogError("");
+      dashboardData.setError("");
     } catch (err: any) {
       setDialogError(err.message || "Operation failed");
-    } finally {
-      dashboardData.setLoading(false);
+      dashboardData.setError(err.message || "Operation failed");
     }
   };
 
@@ -169,9 +105,10 @@ export function useFormState() {
     ...formState,
     setEditingItem,
     setFormData,
-    updateFormData, // Export the new function for partial updates
+    updateFormData,
     setValidationErrors,
     setDialogError,
     handleSubmit,
+    isSubmitting: createMutation.isPending || updateMutation.isPending,
   };
 }

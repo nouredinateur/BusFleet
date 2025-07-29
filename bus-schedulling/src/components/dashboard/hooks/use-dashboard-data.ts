@@ -1,7 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchDrivers, fetchBuses, fetchRoutes, fetchShifts } from "@/lib/api";
+import { useState } from "react";
+import { Driver, Bus, Route, Shift } from "../types";
 
 export function useDashboardData() {
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const queryClient = useQueryClient();
+
   const {
     data: drivers = [],
     isLoading: driversLoading,
@@ -39,7 +45,31 @@ export function useDashboardData() {
   });
 
   const loading = driversLoading || busesLoading || routesLoading || shiftsLoading;
-  const error = driversError || busesError || routesError || shiftsError;
+  const queryError = driversError || busesError || routesError || shiftsError;
+
+  // Setter functions that work with React Query
+  const setDrivers = (newDrivers: Driver[]) => {
+    queryClient.setQueryData(["drivers"], newDrivers);
+  };
+
+  const setBuses = (newBuses: Bus[]) => {
+    queryClient.setQueryData(["buses"], newBuses);
+  };
+
+  const setRoutes = (newRoutes: Route[]) => {
+    queryClient.setQueryData(["routes"], newRoutes);
+  };
+
+  const setShifts = (newShifts: Shift[]) => {
+    queryClient.setQueryData(["shifts"], newShifts);
+  };
+
+  const loadAllData = () => {
+    queryClient.invalidateQueries({ queryKey: ["drivers"] });
+    queryClient.invalidateQueries({ queryKey: ["buses"] });
+    queryClient.invalidateQueries({ queryKey: ["routes"] });
+    queryClient.invalidateQueries({ queryKey: ["shifts"] });
+  };
 
   return {
     drivers,
@@ -47,7 +77,15 @@ export function useDashboardData() {
     routes,
     shifts,
     loading,
-    error: error?.message || "",
-    success: "", // You can manage success messages separately
+    error: error || queryError?.message || "",
+    success,
+    // Setter methods expected by the form logic
+    setDrivers,
+    setBuses,
+    setRoutes,
+    setShifts,
+    setError,
+    setSuccess,
+    loadAllData,
   };
 }

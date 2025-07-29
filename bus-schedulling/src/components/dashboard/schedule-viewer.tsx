@@ -3,11 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Filter, X } from "lucide-react";
 import { Driver, Bus, Route, Shift, FilterState } from "./types";
 import { DataTable } from "@/components/ui/data-table";
 import { createShiftsColumns } from "./columns/shifts-columns";
+import { UserPermissions } from "@/lib/permissions";
 
 interface ScheduleViewerProps {
   shifts: Shift[];
@@ -19,6 +26,7 @@ interface ScheduleViewerProps {
   onCreateShift: () => void;
   onEditShift: (shift: Shift) => void;
   onDeleteShift: (id: number) => void;
+  permissions: UserPermissions;
 }
 
 export function ScheduleViewer({
@@ -31,6 +39,7 @@ export function ScheduleViewer({
   onCreateShift,
   onEditShift,
   onDeleteShift,
+  permissions,
 }: ScheduleViewerProps) {
   const getFilteredShifts = () => {
     return shifts.filter((shift) => {
@@ -38,21 +47,26 @@ export function ScheduleViewer({
       if (filterState.filterDate && filterState.filterDate.trim() !== "") {
         if (shift.shift_date !== filterState.filterDate) return false;
       }
-      
+
       // Driver filter - handle "all" option and empty string
-      if (filterState.filterDriver && 
-          filterState.filterDriver !== "all" && 
-          filterState.filterDriver.trim() !== "") {
-        if (shift.driver_id.toString() !== filterState.filterDriver) return false;
+      if (
+        filterState.filterDriver &&
+        filterState.filterDriver !== "all" &&
+        filterState.filterDriver.trim() !== ""
+      ) {
+        if (shift.driver_id.toString() !== filterState.filterDriver)
+          return false;
       }
-      
+
       // Bus filter - handle "all" option and empty string
-      if (filterState.filterBus && 
-          filterState.filterBus !== "all" && 
-          filterState.filterBus.trim() !== "") {
+      if (
+        filterState.filterBus &&
+        filterState.filterBus !== "all" &&
+        filterState.filterBus.trim() !== ""
+      ) {
         if (shift.bus_id.toString() !== filterState.filterBus) return false;
       }
-      
+
       return true;
     });
   };
@@ -65,11 +79,16 @@ export function ScheduleViewer({
     });
   };
 
-  const hasActiveFilters = filterState.filterDate || 
-    (filterState.filterDriver && filterState.filterDriver !== "all") || 
+  const hasActiveFilters =
+    filterState.filterDate ||
+    (filterState.filterDriver && filterState.filterDriver !== "all") ||
     (filterState.filterBus && filterState.filterBus !== "all");
 
-  const columns = createShiftsColumns({ onEditShift, onDeleteShift });
+  const columns = createShiftsColumns({
+    onEditShift,
+    onDeleteShift,
+    permissions,
+  });
 
   return (
     <div className="space-y-6">
@@ -77,13 +96,15 @@ export function ScheduleViewer({
         <h2 className="text-2xl font-buenard font-bold text-platinum-900">
           Schedule Viewer
         </h2>
-        <Button
-          onClick={onCreateShift}
-          className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Schedule Shift
-        </Button>
+        {permissions.canCreate && (
+          <Button
+            onClick={onCreateShift}
+            className=" bg-black   hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Schedule Shift
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -126,7 +147,9 @@ export function ScheduleViewer({
               </Label>
               <Select
                 value={filterState.filterDriver || "all"}
-                onValueChange={(value) => onFilterChange({ filterDriver: value === "all" ? "" : value })}
+                onValueChange={(value) =>
+                  onFilterChange({ filterDriver: value === "all" ? "" : value })
+                }
               >
                 <SelectTrigger className="font-forum">
                   <SelectValue placeholder="All drivers" />
@@ -147,7 +170,9 @@ export function ScheduleViewer({
               </Label>
               <Select
                 value={filterState.filterBus || "all"}
-                onValueChange={(value) => onFilterChange({ filterBus: value === "all" ? "" : value })}
+                onValueChange={(value) =>
+                  onFilterChange({ filterBus: value === "all" ? "" : value })
+                }
               >
                 <SelectTrigger className="font-forum">
                   <SelectValue placeholder="All buses" />

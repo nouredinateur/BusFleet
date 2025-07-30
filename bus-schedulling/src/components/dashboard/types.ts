@@ -68,7 +68,7 @@ export interface DialogState {
 }
 
 export interface FormState {
-  editingItem: any;
+  editingItem: Driver | Bus | Route | Shift | null;
   formData: FormData;
   validationErrors: ValidationErrors;
   dialogError: string;
@@ -85,5 +85,5 @@ export type TabType = "schedule" | "drivers" | "buses" | "routes";
 export interface Tab {
   id: TabType;
   label: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
 }

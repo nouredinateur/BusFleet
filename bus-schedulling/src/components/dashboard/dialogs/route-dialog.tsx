@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { AlertCircle, Loader2, MapPin, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FormData, ValidationErrors } from "../types";
+import { FormData, ValidationErrors, Route } from "../types";
 
 interface RouteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingItem: any;
+  editingItem: Route | null;
   formData: FormData;
   onFormDataChange: (data: Partial<FormData>) => void;
   validationErrors: ValidationErrors;

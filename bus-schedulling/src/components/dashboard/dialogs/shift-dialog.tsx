@@ -18,23 +18,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Calendar, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FormData, ValidationErrors, Driver, Bus, Route } from "../types";
+import { FormData, ValidationErrors, Shift, Driver, Bus, Route } from "../types";
 
 interface ShiftDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingItem: any;
+  editingItem: Shift | null;
   formData: FormData;
   onFormDataChange: (data: Partial<FormData>) => void;
   validationErrors: ValidationErrors;
   dialogError: string;
   loading: boolean;
+  onSubmit: () => void;
   drivers: Driver[];
   buses: Bus[];
   routes: Route[];
-  onSubmit: () => void;
 }
 
 export function ShiftDialog({

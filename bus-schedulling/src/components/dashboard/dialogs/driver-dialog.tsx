@@ -20,12 +20,12 @@ import {
 } from "@/components/ui/select";
 import { AlertCircle, Loader2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FormData, ValidationErrors } from "../types";
+import { FormData, ValidationErrors, Driver } from "../types";
 
 interface DriverDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingItem: any;
+  editingItem: Driver | null;
   formData: FormData;
   onFormDataChange: (data: Partial<FormData>) => void;
   validationErrors: ValidationErrors;

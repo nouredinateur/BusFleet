@@ -11,14 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertCircle, Loader2, Bus } from "lucide-react";
+import { AlertCircle, Loader2, Bus as BusIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FormData, ValidationErrors } from "../types";
+import { FormData, ValidationErrors, Bus } from "../types";
 
 interface BusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingItem: any;
+  editingItem: Bus | null;
   formData: FormData;
   onFormDataChange: (data: Partial<FormData>) => void;
   validationErrors: ValidationErrors;
@@ -65,7 +65,7 @@ export function BusDialog({
               Plate Number *
             </Label>
             <div className="relative">
-              <Bus className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
+              <BusIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-platinum-600" />
               <Input
                 placeholder="Enter plate number"
                 value={formData.plate_number || ""}

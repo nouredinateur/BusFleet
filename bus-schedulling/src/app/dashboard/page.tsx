@@ -128,8 +128,9 @@ export default function Dashboard() {
       await deleteMutation.mutateAsync({ type, id });
       setSuccessMessage("Item deleted successfully");
       setErrorMessage("");
-    } catch (err: any) {
-      setErrorMessage(err.message || "Delete failed");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Delete failed";
+      setErrorMessage(errorMessage);
       setSuccessMessage("");
     }
   };
@@ -278,12 +279,16 @@ export default function Dashboard() {
         <DriverDialog
           open={dialogState.driverDialogOpen}
           onOpenChange={dialogState.setDriverDialogOpen}
-          editingItem={formState.editingItem}
+          editingItem={
+            formState.editingItem && "name" in formState.editingItem
+              ? formState.editingItem
+              : null
+          }
           formData={formState.formData}
           onFormDataChange={formState.updateFormData}
           validationErrors={formState.validationErrors}
           dialogError={formState.dialogError}
-          loading={dashboardData.loading}
+          loading={formState.isSubmitting}
           onSubmit={handleDriverSubmit}
         />
       )}
@@ -292,7 +297,11 @@ export default function Dashboard() {
         <BusDialog
           open={dialogState.busDialogOpen}
           onOpenChange={dialogState.setBusDialogOpen}
-          editingItem={formState.editingItem}
+          editingItem={
+            formState.editingItem && "plate_number" in formState.editingItem
+              ? formState.editingItem
+              : null
+          }
           formData={formState.formData}
           onFormDataChange={formState.updateFormData}
           validationErrors={formState.validationErrors}
@@ -306,7 +315,11 @@ export default function Dashboard() {
         <RouteDialog
           open={dialogState.routeDialogOpen}
           onOpenChange={dialogState.setRouteDialogOpen}
-          editingItem={formState.editingItem}
+          editingItem={
+            formState.editingItem && "origin" in formState.editingItem
+              ? formState.editingItem
+              : null
+          }
           formData={formState.formData}
           onFormDataChange={formState.updateFormData}
           validationErrors={formState.validationErrors}
@@ -320,7 +333,16 @@ export default function Dashboard() {
         <ShiftDialog
           open={dialogState.shiftDialogOpen}
           onOpenChange={dialogState.setShiftDialogOpen}
-          editingItem={formState.editingItem}
+          editingItem={
+            formState.editingItem &&
+            "driver_id" in formState.editingItem &&
+            "bus_id" in formState.editingItem &&
+            "route_id" in formState.editingItem &&
+            "shift_date" in formState.editingItem &&
+            "shift_time" in formState.editingItem
+              ? formState.editingItem
+              : null
+          }
           formData={formState.formData}
           onFormDataChange={formState.updateFormData}
           validationErrors={formState.validationErrors}

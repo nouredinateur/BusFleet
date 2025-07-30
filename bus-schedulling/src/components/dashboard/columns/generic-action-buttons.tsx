@@ -8,7 +8,6 @@ import { UserPermissions } from "@/lib/permissions";
 
 interface BaseEntity {
   id: number;
-  [key: string]: any;
 }
 
 interface GenericActionButtonsProps<T extends BaseEntity> {

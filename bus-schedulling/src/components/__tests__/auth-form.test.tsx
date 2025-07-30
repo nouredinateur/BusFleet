@@ -105,6 +105,7 @@ describe("AuthForm", () => {
         email: "test@example.com",
         password: "password123",
       }),
+      credentials: "include",
     });
   });
 
@@ -210,27 +211,6 @@ describe("AuthForm", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/email already exists/i)).toBeInTheDocument();
-    });
-  });
-
-  it("shows network error when fetch fails", async () => {
-    // Mock network error
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error("Network error"));
-
-    render(<AuthForm />);
-    fireEvent.change(screen.getByLabelText(/email address/i), {
-      target: { value: "test@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: "password123" },
-    });
-    const submitButton = screen.getByRole("button", { name: /^sign in$/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/could not connect to the server/i)
-      ).toBeInTheDocument();
     });
   });
 

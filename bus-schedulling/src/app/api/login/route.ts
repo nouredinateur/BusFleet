@@ -61,14 +61,17 @@ export async function POST(request: Request) {
       {
         userId: user.id,
         email: user.email,
-        role: user.roleName || 'viewer', // Default to viewer if no role assigned
+        name: user.name,
+        role: user.roleName || "viewer", // Default to viewer if no role assigned
         roleId: user.roleId,
       },
       process.env.JWT_SECRET || "secretkey",
       { expiresIn: "1d" }
     );
 
-    console.log(`✅ Login successful for: ${email} with role: ${user.roleName}`);
+    console.log(
+      `✅ Login successful for: ${email} with role: ${user.roleName}`
+    );
 
     // Create response
     const response = NextResponse.json({
@@ -77,7 +80,7 @@ export async function POST(request: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.roleName || 'viewer',
+        role: user.roleName || "viewer",
       },
     });
 

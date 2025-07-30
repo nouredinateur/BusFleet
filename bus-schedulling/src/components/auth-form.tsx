@@ -214,30 +214,30 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 p-4">
-      <div className="w-full max-w-md mx-auto">
-        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm w-[400px]">
-          <CardHeader className="space-y-6 text-center pb-8">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 p-0 sm:p-4 md:p-6">
+      <div className="w-full sm:max-w-[400px] mx-auto">
+        <Card className="shadow-none sm:shadow-2xl border-0 sm:border bg-white sm:bg-white/95 sm:backdrop-blur-sm w-full min-h-screen sm:min-h-0 flex flex-col sm:block md:w-[400px]">
+          <CardHeader className="space-y-4 sm:space-y-6 text-center pb-6 sm:pb-8 px-6 sm:px-8 pt-8 sm:pt-6 flex-shrink-0">
             {/* Brand Logo */}
-            <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center">
+            <div className="mx-auto w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center">
               <div>
                 <img
                   src="/markoub.png"
                   alt="Markoub Logo"
-                  className="w-16 h-16"
+                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16"
                 />
-              </div>{" "}
+              </div>
             </div>
 
             {/* Title and Description */}
             <div className="space-y-2">
               <CardTitle
                 data-testid="auth-form-title"
-                className="text-2xl font-buenard font-bold text-platinum-900"
+                className="text-xl sm:text-2xl font-buenard font-bold text-platinum-900"
               >
                 {isLogin ? "Welcome Back" : "Create Account"}
               </CardTitle>
-              <CardDescription className="text-platinum-700 text-base font-inknut">
+              <CardDescription className="text-platinum-700 text-sm sm:text-base font-inknut px-2">
                 {isLogin
                   ? "Sign in to access your bus management dashboard"
                   : "Join our bus management platform today"}
@@ -245,12 +245,12 @@ export default function AuthForm() {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6 px-8">
+          <CardContent className="space-y-4 sm:space-y-6 px-6 sm:px-8 flex-1 flex flex-col justify-center sm:justify-start">
             {/* Error Alert */}
             {errors.general && (
               <Alert className="border-error-200 bg-error-50">
                 <AlertCircle className="h-4 w-4 text-error-600" />
-                <AlertDescription className="text-error-700 font-forum">
+                <AlertDescription className="text-error-700 font-forum text-sm">
                   {errors.general}
                 </AlertDescription>
               </Alert>
@@ -260,13 +260,13 @@ export default function AuthForm() {
             {success && (
               <Alert className="border-success-200 bg-success-50">
                 <CheckCircle className="h-4 w-4 text-success-600" />
-                <AlertDescription className="text-success-700 font-forum">
+                <AlertDescription className="text-success-700 font-forum text-sm">
                   {success}
                 </AlertDescription>
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               {/* Full Name Field (Signup only) */}
               {!isLogin && (
                 <div className="space-y-2">
@@ -287,7 +287,7 @@ export default function AuthForm() {
                         handleInputChange("fullName", e.target.value)
                       }
                       className={cn(
-                        "pl-10 h-11 font-forum transition-all duration-200",
+                        "pl-10 h-12 sm:h-11 font-forum transition-all duration-200 text-base sm:text-sm",
                         errors.fullName
                           ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
                           : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
@@ -320,7 +320,7 @@ export default function AuthForm() {
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className={cn(
-                      "pl-10 h-11 font-forum transition-all duration-200",
+                      "pl-10 h-12 sm:h-11 font-forum transition-all duration-200 text-base sm:text-sm",
                       errors.email
                         ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
                         : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
@@ -355,7 +355,7 @@ export default function AuthForm() {
                         handleInputChange("phone", e.target.value)
                       }
                       className={cn(
-                        "pl-10 h-11 font-forum transition-all duration-200",
+                        "pl-10 h-12 sm:h-11 font-forum transition-all duration-200 text-base sm:text-sm",
                         errors.phone
                           ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
                           : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
@@ -390,7 +390,7 @@ export default function AuthForm() {
                       handleInputChange("password", e.target.value)
                     }
                     className={cn(
-                      "pl-10 pr-10 h-11 font-forum transition-all duration-200",
+                      "pl-10 pr-12 h-12 sm:h-11 font-forum transition-all duration-200 text-base sm:text-sm",
                       errors.password
                         ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
                         : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
@@ -400,7 +400,7 @@ export default function AuthForm() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors p-1 touch-manipulation"
                     disabled={loading}
                   >
                     {showPassword ? (
@@ -437,7 +437,7 @@ export default function AuthForm() {
                         handleInputChange("confirmPassword", e.target.value)
                       }
                       className={cn(
-                        "pl-10 pr-10 h-11 font-forum transition-all duration-200",
+                        "pl-10 pr-12 h-12 sm:h-11 font-forum transition-all duration-200 text-base sm:text-sm",
                         errors.confirmPassword
                           ? "border-error-300 bg-error-50 focus:border-error-500 focus:ring-error-200"
                           : "border-platinum-300 focus:border-persian-blue-500 focus:ring-persian-blue-200"
@@ -449,7 +449,7 @@ export default function AuthForm() {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-platinum-600 hover:text-persian-blue-500 transition-colors p-1 touch-manipulation"
                       disabled={loading}
                     >
                       {showConfirmPassword ? (
@@ -470,7 +470,7 @@ export default function AuthForm() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-11 bg-black-950 text-white shadow-lg  hover:from-persian-blue-600 hover:to-dark-cyan-600 font-medium text-base font-inknut transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50 focus:ring-2 focus:ring-persian-blue-400 focus:ring-offset-2"
+                className="w-full h-12 sm:h-11 bg-black-950 text-white shadow-lg hover:from-persian-blue-600 hover:to-dark-cyan-600 font-medium text-base sm:text-base font-inknut transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50 focus:ring-2 focus:ring-persian-blue-400 focus:ring-offset-2 touch-manipulation"
                 disabled={loading}
               >
                 {loading ? (
@@ -487,12 +487,12 @@ export default function AuthForm() {
             </form>
           </CardContent>
 
-          <CardFooter className="flex flex-col space-y-4 pt-6 px-8 pb-8">
+          <CardFooter className="flex flex-col space-y-3 sm:space-y-4 pt-4 sm:pt-6 px-6 sm:px-8 pb-8 sm:pb-8 flex-shrink-0">
             <Separator className="bg-platinum-300" />
 
             {/* Toggle Mode */}
             <div className="text-center space-y-3">
-              <p className="text-sm text-platinum-700 font-forum ">
+              <p className="text-sm text-platinum-700 font-forum">
                 {isLogin
                   ? "Don't have an account?"
                   : "Already have an account?"}
@@ -500,7 +500,7 @@ export default function AuthForm() {
               <Button
                 variant="ghost"
                 onClick={toggleMode}
-                className="text-persian-blue-500 hover:text-persian-blue-600 hover:bg-persian-blue-50 font-medium font-inknut transition-all duration-200 focus:ring-2 focus:ring-persian-blue-400 hover:bg-white/80 hover:text-orange-600"
+                className="text-persian-blue-500 hover:text-persian-blue-600 hover:bg-persian-blue-50 font-medium font-inknut transition-all duration-200 focus:ring-2 focus:ring-persian-blue-400 hover:bg-white/80 hover:text-orange-600 h-10 sm:h-auto touch-manipulation"
                 disabled={loading}
               >
                 {isLogin ? "Create Account" : "Sign In"}
@@ -511,7 +511,7 @@ export default function AuthForm() {
             {isLogin && (
               <Button
                 variant="link"
-                className="text-sm text-dark-cyan-500 hover:text-dark-cyan-600 p-0 h-auto font-normal font-forum focus:ring-2 focus:ring-dark-cyan-400"
+                className="text-sm text-dark-cyan-500 hover:text-dark-cyan-600 p-2 h-auto font-normal font-forum focus:ring-2 focus:ring-dark-cyan-400 touch-manipulation"
                 disabled={loading}
               >
                 Forgot your password?

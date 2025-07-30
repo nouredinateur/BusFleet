@@ -11,7 +11,7 @@ export async function GET() {
   try {
     const buses = await db.select().from(busesTable);
     return NextResponse.json(buses);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch buses" },
       { status: 500 }

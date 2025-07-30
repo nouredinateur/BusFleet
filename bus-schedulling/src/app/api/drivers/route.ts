@@ -105,6 +105,11 @@ export async function DELETE(request: NextRequest) {
     return createUnauthorizedResponse(error || "Unauthorized");
   }
 
+  // Ensure user is defined (should always be true when authorized is true)
+  if (!user) {
+    return createUnauthorizedResponse("User information not available");
+  }
+
   // Additional check: dispatchers cannot delete users or buses
   if (user.role === 'dispatcher') {
     return createUnauthorizedResponse("Dispatchers cannot delete drivers");

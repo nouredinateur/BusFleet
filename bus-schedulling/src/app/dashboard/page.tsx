@@ -233,7 +233,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-persian-blue-50 via-dark-cyan-50 to-platinum-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-l-4 border-black mx-auto"></div>
           <p className="mt-4 text-platinum-600 font-inknut">
             Loading dashboard...
           </p>
@@ -270,9 +270,7 @@ export default function Dashboard() {
         <DashboardTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Optimized Tab Content - Only renders active tab */}
-        <div className="min-h-[400px]">
-          {tabContent}
-        </div>
+        <div className="min-h-[400px]">{tabContent}</div>
       </div>
 
       {/* Dialogs - only show if user has permissions */}

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { busesTable } from "@/db/schema";
+import { busesTable, shiftsTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
-
+ 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 
@@ -64,10 +64,7 @@ export async function PUT(request: NextRequest) {
       .returning();
 
     if (!bus) {
-      return NextResponse.json(
-        { error: "Bus not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Bus not found" }, { status: 404 });
     }
 
     return NextResponse.json(bus);
@@ -91,10 +88,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await db.delete(busesTable).where(eq(busesTable.id, parseInt(id)));
+    const busId = parseInt(id);
+
+    // Use a transaction to ensure both operations succeed or both fail
+    await db.transaction(async (tx) => {
+      // First, delete all shifts associated with this bus
+      await tx.delete(shiftsTable).where(eq(shiftsTable.bus_id, busId));
+      
+      // Then delete the bus
+      await tx.delete(busesTable).where(eq(busesTable.id, busId));
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.log("err", error);
     return NextResponse.json(
       { error: "Failed to delete bus" },
       { status: 500 }

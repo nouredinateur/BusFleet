@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { routesTable } from "@/db/schema";
+import { routesTable, shiftsTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -91,10 +91,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await db.delete(routesTable).where(eq(routesTable.id, parseInt(id)));
+    const routeId = parseInt(id);
+
+    // Use a transaction to ensure both operations succeed or both fail
+    await db.transaction(async (tx) => {
+      // First, delete all shifts associated with this route
+      await tx.delete(shiftsTable).where(eq(shiftsTable.route_id, routeId));
+      
+      // Then delete the route
+      await tx.delete(routesTable).where(eq(routesTable.id, routeId));
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.log("err", error);
     return NextResponse.json(
       { error: "Failed to delete route" },
       { status: 500 }

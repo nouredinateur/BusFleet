@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { driversTable } from "@/db/schema";
+import { driversTable, shiftsTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { checkPermission, createUnauthorizedResponse } from "@/lib/permissions";
 
@@ -121,10 +121,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await db.delete(driversTable).where(eq(driversTable.id, parseInt(id)));
+    const driverId = parseInt(id);
+
+    // Use a transaction to ensure both operations succeed or both fail
+    await db.transaction(async (tx) => {
+      // First, delete all shifts associated with this driver
+      await tx.delete(shiftsTable).where(eq(shiftsTable.driver_id, driverId));
+      
+      // Then delete the driver
+      await tx.delete(driversTable).where(eq(driversTable.id, driverId));
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.log("err", error);
     return NextResponse.json(
       { error: "Failed to delete driver" },
       { status: 500 }

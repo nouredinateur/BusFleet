@@ -1,18 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Filter, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Driver, Bus, Route, Shift, FilterState } from "./types";
-import { DataTable } from "@/components/ui/data-table";
+import { EnhancedDataTable } from "@/components/ui/enhanced-data-table";
 import { createShiftsColumns } from "./columns/shifts-columns";
 import { UserPermissions } from "@/lib/permissions";
 
@@ -41,65 +31,58 @@ export function ScheduleViewer({
   onDeleteShift,
   permissions,
 }: ScheduleViewerProps) {
-  const getFilteredShifts = () => {
-    return shifts.filter((shift) => {
-      // Date filter - handle empty string and compare properly
-      if (filterState.filterDate && filterState.filterDate.trim() !== "") {
-        if (shift.shift_date !== filterState.filterDate) return false;
-      }
-
-      // Driver filter - handle "all" option and empty string
-      if (
-        filterState.filterDriver &&
-        filterState.filterDriver !== "all" &&
-        filterState.filterDriver.trim() !== ""
-      ) {
-        if (shift.driver_id.toString() !== filterState.filterDriver)
-          return false;
-      }
-
-      // Bus filter - handle "all" option and empty string
-      if (
-        filterState.filterBus &&
-        filterState.filterBus !== "all" &&
-        filterState.filterBus.trim() !== ""
-      ) {
-        if (shift.bus_id.toString() !== filterState.filterBus) return false;
-      }
-
-      return true;
-    });
-  };
-
-  const handleResetFilters = () => {
-    onFilterChange({
-      filterDate: "",
-      filterDriver: "",
-      filterBus: "",
-    });
-  };
-
-  const hasActiveFilters =
-    filterState.filterDate ||
-    (filterState.filterDriver && filterState.filterDriver !== "all") ||
-    (filterState.filterBus && filterState.filterBus !== "all");
-
   const columns = createShiftsColumns({
     onEditShift,
     onDeleteShift,
     permissions,
   });
 
+  // Convert filter options for enhanced data table
+  const columnFilters = [
+    {
+      columnId: "shift_date",
+      label: "Date",
+      type: "select" as const,
+      placeholder: "All dates",
+      options: [...new Set(shifts.map((shift) => shift.shift_date))].map(
+        (date) => ({
+          value: date,
+          label: new Date(date).toLocaleDateString(),
+        })
+      ),
+    },
+    {
+      columnId: "driver_name",
+      label: "Driver",
+      type: "select" as const,
+      placeholder: "All drivers",
+      options: drivers.map((driver) => ({
+        value: driver.name,
+        label: driver.name,
+      })),
+    },
+    {
+      columnId: "bus_plate_number",
+      label: "Bus",
+      type: "select" as const,
+      placeholder: "All buses",
+      options: buses.map((bus) => ({
+        value: bus.plate_number,
+        label: bus.plate_number,
+      })),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-buenard font-bold text-platinum-900">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h2 className="text-xl sm:text-2xl font-buenard font-bold text-platinum-900">
           Schedule Viewer
         </h2>
         {permissions.canCreate && (
           <Button
             onClick={onCreateShift}
-            className=" bg-black   hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
+            className="bg-black hover:bg-gray-800 text-white font-inknut w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             Schedule Shift
@@ -107,101 +90,14 @@ export function ScheduleViewer({
         )}
       </div>
 
-      {/* Filters */}
-      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center space-x-2 font-buenard">
-              <Filter className="w-5 h-5" />
-              <span>Filters</span>
-            </CardTitle>
-            {hasActiveFilters && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetFilters}
-                className="text-sm font-inknut"
-              >
-                <X className="w-4 h-4 mr-1" />
-                Reset Filters
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Date
-              </Label>
-              <Input
-                type="date"
-                value={filterState.filterDate}
-                onChange={(e) => onFilterChange({ filterDate: e.target.value })}
-                className="font-forum h-10"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Driver
-              </Label>
-              <Select
-                value={filterState.filterDriver || "all"}
-                onValueChange={(value) =>
-                  onFilterChange({ filterDriver: value === "all" ? "" : value })
-                }
-              >
-                <SelectTrigger className="font-forum">
-                  <SelectValue placeholder="All drivers" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All drivers</SelectItem>
-                  {drivers.map((driver) => (
-                    <SelectItem key={driver.id} value={driver.id.toString()}>
-                      {driver.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-platinum-800 font-inknut">
-                Bus
-              </Label>
-              <Select
-                value={filterState.filterBus || "all"}
-                onValueChange={(value) =>
-                  onFilterChange({ filterBus: value === "all" ? "" : value })
-                }
-              >
-                <SelectTrigger className="font-forum">
-                  <SelectValue placeholder="All buses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All buses</SelectItem>
-                  {buses.map((bus) => (
-                    <SelectItem key={bus.id} value={bus.id.toString()}>
-                      {bus.plate_number}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Shifts Table */}
-      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="px-6">
-          <DataTable
-            columns={columns}
-            data={getFilteredShifts()}
-            searchKey="shift_date"
-            searchPlaceholder="Search by date..."
-          />
-        </CardContent>
-      </Card>
+      <EnhancedDataTable
+        columns={columns}
+        data={shifts}
+        title="Shifts Schedule"
+        searchKey="shift_date"
+        searchPlaceholder="Search by date..."
+        columnFilters={columnFilters}
+      />
     </div>
   );
 }

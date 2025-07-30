@@ -9,6 +9,7 @@ import { useUser } from "@/contexts/user-context";
 export function DashboardHeader() {
   const router = useRouter();
   const { user, setUser } = useUser();
+  
   const handleLogout = async () => {
     try {
       const response = await fetch("/api/logout", {
@@ -32,39 +33,55 @@ export function DashboardHeader() {
 
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-platinum-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            <div>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16">
+          {/* Logo and Title Section */}
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+            <div className="flex-shrink-0">
               <img
                 src="/markoub.png"
                 alt="Markoub Logo"
-                className="w-16 h-16"
+                className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16"
               />
             </div>
-            <div>
-              <h1 className="text-xl font-buenard font-bold text-platinum-900">
-                Bus Management Dashboard
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-buenard font-bold text-platinum-900 truncate">
+                BusFleet
               </h1>
-              <p className="text-sm text-platinum-600 font-forum">
+              <p className="text-xs sm:text-sm text-platinum-600 font-forum truncate hidden sm:block">
                 Manage your fleet operations
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+
+          {/* User Info and Logout Section */}
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+            {/* User Welcome - Hidden on very small screens */}
             {user && (
-              <div className="text-sm text-platinum-600">
+              <div className="text-xs sm:text-sm text-platinum-600 hidden md:block">
                 Welcome,{" "}
-                <span className=" text-black font-medium">{user.name}</span>
+                <span className="text-black font-medium">{user.name}</span>
               </div>
             )}
+            
+            {/* User Initial on small screens */}
+            {user && (
+              <div className="md:hidden w-8 h-8 bg-platinum-100 rounded-full flex items-center justify-center">
+                <span className="text-xs font-medium text-platinum-700">
+                  {user.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+
+            {/* Logout Button */}
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="cursor-pointer text-platinum-700 hover:text-accent font-bold hover:bg-black font-inknut"
+              className="cursor-pointer text-platinum-700 hover:text-accent font-bold hover:bg-black font-inknut h-8 sm:h-9 px-2 sm:px-3"
+              size="sm"
             >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              <LogOut className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>

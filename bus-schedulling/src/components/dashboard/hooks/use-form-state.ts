@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FormData, ValidationErrors, FormState } from "../types";
+import { FormData, ValidationErrors, FormState, Driver, Bus, Route, Shift, DashboardState, DialogState } from "../types";
 import { 
   validateDriverForm, 
   validateBusForm, 
@@ -21,7 +21,7 @@ export function useFormState() {
   const createMutation = useCreateMutation();
   const updateMutation = useUpdateMutation();
 
-  const setEditingItem = (item: any) => {
+  const setEditingItem = (item: Driver | Bus | Route | Shift | null) => {
     setFormState(prev => ({ ...prev, editingItem: item }));
   };
 
@@ -44,7 +44,7 @@ export function useFormState() {
     setFormState(prev => ({ ...prev, dialogError: error }));
   };
 
-  const handleSubmit = async (type: string, dashboardData: any, dialogState: any) => {
+  const handleSubmit = async (type: string, dashboardData: DashboardState & { setSuccess: (msg: string) => void; setError: (msg: string) => void }, dialogState: DialogState & { setDriverDialogOpen: (open: boolean) => void; setBusDialogOpen: (open: boolean) => void; setRouteDialogOpen: (open: boolean) => void; setShiftDialogOpen: (open: boolean) => void }) => {
     setDialogError("");
     setValidationErrors({});
     
@@ -95,9 +95,10 @@ export function useFormState() {
       setValidationErrors({});
       setDialogError("");
       dashboardData.setError("");
-    } catch (err: any) {
-      setDialogError(err.message || "Operation failed");
-      dashboardData.setError(err.message || "Operation failed");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Operation failed";
+      setDialogError(errorMessage);
+      dashboardData.setError(errorMessage);
     }
   };
 

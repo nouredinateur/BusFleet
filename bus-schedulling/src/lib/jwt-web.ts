@@ -1,5 +1,10 @@
 // Web Crypto API compatible JWT functions
-export async function verifyJWT(token: string, secret: string): Promise<any> {
+interface JWTPayload {
+  exp?: number;
+  [key: string]: unknown;
+}
+
+export async function verifyJWT(token: string, secret: string): Promise<JWTPayload> {
   try {
     const [headerB64, payloadB64, signatureB64] = token.split('.');
     
@@ -8,7 +13,7 @@ export async function verifyJWT(token: string, secret: string): Promise<any> {
     }
 
     // Decode payload
-    const payload = JSON.parse(atob(payloadB64));
+    const payload = JSON.parse(atob(payloadB64)) as JWTPayload;
     
     // Check expiration
     if (payload.exp && Date.now() >= payload.exp * 1000) {

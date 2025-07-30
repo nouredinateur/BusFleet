@@ -1,8 +1,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { FormData } from "../types";
 
 interface DeleteMutationParams {
   type: string;
   id: number;
+}
+
+interface CreateMutationParams {
+  type: string;
+  data: FormData;
+}
+
+interface UpdateMutationParams {
+  type: string;
+  data: FormData & { id: number };
 }
 
 export function useDeleteMutation() {
@@ -32,7 +43,7 @@ export function useCreateMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ type, data }: { type: string; data: any }) => {
+    mutationFn: async ({ type, data }: CreateMutationParams) => {
       const response = await fetch(`/api/${type}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,7 +67,7 @@ export function useUpdateMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ type, data }: { type: string; data: any }) => {
+    mutationFn: async ({ type, data }: UpdateMutationParams) => {
       const response = await fetch(`/api/${type}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

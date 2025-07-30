@@ -8,6 +8,11 @@ export interface UserPermissions {
   canView: boolean;
 }
 
+interface User {
+  role: string;
+  [key: string]: unknown;
+}
+
 export function getRolePermissions(role: string): UserPermissions {
   switch (role) {
     case 'admin':
@@ -44,7 +49,7 @@ export function getRolePermissions(role: string): UserPermissions {
 export async function checkPermission(
   request: NextRequest,
   requiredPermission: keyof UserPermissions
-): Promise<{ authorized: boolean; user?: any; error?: string }> {
+): Promise<{ authorized: boolean; user?: User; error?: string }> {
   try {
     const token = request.cookies.get("token");
     
@@ -52,7 +57,7 @@ export async function checkPermission(
       return { authorized: false, error: "No token provided" };
     }
 
-    const user = await verifyJWT(token.value, process.env.JWT_SECRET || "secretkey");
+    const user = await verifyJWT(token.value, process.env.JWT_SECRET || "secretkey") as User;
     const permissions = getRolePermissions(user.role);
 
     if (!permissions[requiredPermission]) {

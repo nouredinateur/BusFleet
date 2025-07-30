@@ -11,5 +11,18 @@ services:
     ports:
       - "5433:5432"
 
+  app:
+    build:
+      context: ./bus-schedulling
+      dockerfile: Dockerfile
+      args:
+        - DATABASE_URL=postgresql://postgres:postgres@db:5432/bus_app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/bus_app
+
 volumes:
   db_data:

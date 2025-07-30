@@ -3,10 +3,16 @@ import { fetchDrivers, fetchBuses, fetchRoutes, fetchShifts } from "@/lib/api";
 import { useState } from "react";
 import { Driver, Bus, Route, Shift } from "../types";
 
-export function useDashboardData() {
+export function useDashboardData(activeTab?: string) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const queryClient = useQueryClient();
+
+  // Only fetch data for active tab and schedule (which needs all data)
+  const shouldFetchDrivers = !activeTab || activeTab === "schedule" || activeTab === "drivers";
+  const shouldFetchBuses = !activeTab || activeTab === "schedule" || activeTab === "buses";
+  const shouldFetchRoutes = !activeTab || activeTab === "schedule" || activeTab === "routes";
+  const shouldFetchShifts = !activeTab || activeTab === "schedule";
 
   const {
     data: drivers = [],
@@ -15,6 +21,7 @@ export function useDashboardData() {
   } = useQuery({
     queryKey: ["drivers"],
     queryFn: fetchDrivers,
+    enabled: shouldFetchDrivers,
   });
 
   const {
@@ -24,6 +31,7 @@ export function useDashboardData() {
   } = useQuery({
     queryKey: ["buses"],
     queryFn: fetchBuses,
+    enabled: shouldFetchBuses,
   });
 
   const {
@@ -33,6 +41,7 @@ export function useDashboardData() {
   } = useQuery({
     queryKey: ["routes"],
     queryFn: fetchRoutes,
+    enabled: shouldFetchRoutes,
   });
 
   const {
@@ -42,6 +51,7 @@ export function useDashboardData() {
   } = useQuery({
     queryKey: ["shifts"],
     queryFn: fetchShifts,
+    enabled: shouldFetchShifts,
   });
 
   const loading = driversLoading || busesLoading || routesLoading || shiftsLoading;

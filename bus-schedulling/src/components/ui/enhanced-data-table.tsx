@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -52,9 +52,13 @@ export function EnhancedDataTable<TData, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFiltersState, setColumnFiltersState] = React.useState<ColumnFiltersState>([]);
 
+  // Memoize table configuration to prevent unnecessary recalculations
+  const memoizedColumns = useMemo(() => columns, [columns]);
+  const memoizedData = useMemo(() => data, [data]);
+
   const table = useReactTable({
-    data,
-    columns,
+    data: memoizedData,
+    columns: memoizedColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -72,9 +76,10 @@ export function EnhancedDataTable<TData, TValue>({
     },
   });
 
-  const handleResetFilters = () => {
+  // Memoize filter handlers to prevent unnecessary re-renders
+  const handleResetFilters = React.useCallback(() => {
     setColumnFiltersState([]);
-  };
+  }, []);
 
   const hasActiveFilters = columnFiltersState.length > 0;
 

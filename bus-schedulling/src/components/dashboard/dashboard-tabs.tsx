@@ -25,7 +25,8 @@ export function DashboardTabs({ activeTab, onTabChange }: DashboardTabsProps) {
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "flex items-center space-x-2 px-4 py-3 rounded-lg font-medium font-inknut transition-all duration-200",
+              "flex items-center space-x-2 px-4 py-3 rounded-lg font-medium font-inknut transition-all duration-150 ease-in-out transform",
+              "hover:scale-[1.02] active:scale-[0.98]", // Add subtle scale effects
               activeTab === tab.id
                 ? "bg-black-950 text-white shadow-lg"
                 : "text-gray-700 hover:bg-white/80 hover:text-orange-600"

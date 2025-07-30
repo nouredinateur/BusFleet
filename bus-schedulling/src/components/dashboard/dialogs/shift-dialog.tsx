@@ -85,10 +85,13 @@ export function ShiftDialog({
                 onFormDataChange({ driver_id: parseInt(value) })
               }
             >
-              <SelectTrigger className={cn(
-                "font-forum",
-                validationErrors.driver_id && "border-error-500 focus:border-error-500"
-              )}>
+              <SelectTrigger
+                className={cn(
+                  "font-forum",
+                  validationErrors.driver_id &&
+                    "border-error-500 focus:border-error-500"
+                )}
+              >
                 <SelectValue placeholder="Select driver" />
               </SelectTrigger>
               <SelectContent>
@@ -118,10 +121,13 @@ export function ShiftDialog({
                 onFormDataChange({ bus_id: parseInt(value) })
               }
             >
-              <SelectTrigger className={cn(
-                "font-forum",
-                validationErrors.bus_id && "border-error-500 focus:border-error-500"
-              )}>
+              <SelectTrigger
+                className={cn(
+                  "font-forum",
+                  validationErrors.bus_id &&
+                    "border-error-500 focus:border-error-500"
+                )}
+              >
                 <SelectValue placeholder="Select bus" />
               </SelectTrigger>
               <SelectContent>
@@ -149,16 +155,20 @@ export function ShiftDialog({
                 onFormDataChange({ route_id: parseInt(value) })
               }
             >
-              <SelectTrigger className={cn(
-                "font-forum",
-                validationErrors.route_id && "border-error-500 focus:border-error-500"
-              )}>
+              <SelectTrigger
+                className={cn(
+                  "font-forum",
+                  validationErrors.route_id &&
+                    "border-error-500 focus:border-error-500"
+                )}
+              >
                 <SelectValue placeholder="Select route" />
               </SelectTrigger>
               <SelectContent>
                 {routes.map((route) => (
                   <SelectItem key={route.id} value={route.id.toString()}>
-                    {route.origin} → {route.destination} ({route.estimated_duration_minutes} min)
+                    {route.origin} → {route.destination} (
+                    {route.estimated_duration_minutes} min)
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -177,12 +187,11 @@ export function ShiftDialog({
             <Input
               type="date"
               value={formData.shift_date || ""}
-              onChange={(e) =>
-                onFormDataChange({ shift_date: e.target.value })
-              }
+              onChange={(e) => onFormDataChange({ shift_date: e.target.value })}
               className={cn(
                 "font-forum",
-                validationErrors.shift_date && "border-error-500 focus:border-error-500"
+                validationErrors.shift_date &&
+                  "border-error-500 focus:border-error-500"
               )}
             />
             {validationErrors.shift_date && (
@@ -199,12 +208,11 @@ export function ShiftDialog({
             <Input
               type="time"
               value={formData.shift_time || ""}
-              onChange={(e) =>
-                onFormDataChange({ shift_time: e.target.value })
-              }
+              onChange={(e) => onFormDataChange({ shift_time: e.target.value })}
               className={cn(
                 "font-forum",
-                validationErrors.shift_time && "border-error-500 focus:border-error-500"
+                validationErrors.shift_time &&
+                  "border-error-500 focus:border-error-500"
               )}
             />
             {validationErrors.shift_time && (
@@ -226,11 +234,9 @@ export function ShiftDialog({
           <Button
             onClick={onSubmit}
             disabled={loading}
-            className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
+            className="bg-black text-white font-inknut"
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : null}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             {editingItem ? "Update" : "Create"}
           </Button>
         </DialogFooter>

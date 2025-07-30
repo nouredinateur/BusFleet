@@ -74,7 +74,8 @@ export function BusDialog({
                 }
                 className={cn(
                   "pl-10 font-forum",
-                  validationErrors.plate_number && "border-error-500 focus:border-error-500"
+                  validationErrors.plate_number &&
+                    "border-error-500 focus:border-error-500"
                 )}
               />
             </div>
@@ -100,7 +101,8 @@ export function BusDialog({
               }
               className={cn(
                 "font-forum",
-                validationErrors.capacity && "border-error-500 focus:border-error-500"
+                validationErrors.capacity &&
+                  "border-error-500 focus:border-error-500"
               )}
             />
             {validationErrors.capacity && (
@@ -122,11 +124,9 @@ export function BusDialog({
           <Button
             onClick={onSubmit}
             disabled={loading}
-            className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
+            className="bg-black text-white font-inknut"
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : null}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             {editingItem ? "Update" : "Create"}
           </Button>
         </DialogFooter>

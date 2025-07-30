@@ -53,9 +53,7 @@ export function DriverDialog({
             {editingItem ? "Edit Driver" : "Add New Driver"}
           </DialogTitle>
           <DialogDescription className="font-forum">
-            {editingItem
-              ? "Update driver information"
-              : "Enter driver details"}
+            {editingItem ? "Update driver information" : "Enter driver details"}
           </DialogDescription>
         </DialogHeader>
 
@@ -78,12 +76,11 @@ export function DriverDialog({
               <Input
                 placeholder="Enter driver name"
                 value={formData.name || ""}
-                onChange={(e) =>
-                  onFormDataChange({ name: e.target.value })
-                }
+                onChange={(e) => onFormDataChange({ name: e.target.value })}
                 className={cn(
                   "pl-10 font-forum",
-                  validationErrors.name && "border-error-500 focus:border-error-500"
+                  validationErrors.name &&
+                    "border-error-500 focus:border-error-500"
                 )}
               />
             </div>
@@ -106,7 +103,8 @@ export function DriverDialog({
               }
               className={cn(
                 "font-forum",
-                validationErrors.license_number && "border-error-500 focus:border-error-500"
+                validationErrors.license_number &&
+                  "border-error-500 focus:border-error-500"
               )}
             />
             {validationErrors.license_number && (
@@ -148,11 +146,9 @@ export function DriverDialog({
           <Button
             onClick={onSubmit}
             disabled={loading}
-            className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
+            className="bg-black text-white font-inknut"
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : null}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             {editingItem ? "Update" : "Create"}
           </Button>
         </DialogFooter>

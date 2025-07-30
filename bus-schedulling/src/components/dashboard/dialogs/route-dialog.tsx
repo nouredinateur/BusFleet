@@ -69,12 +69,11 @@ export function RouteDialog({
               <Input
                 placeholder="Enter origin location"
                 value={formData.origin || ""}
-                onChange={(e) =>
-                  onFormDataChange({ origin: e.target.value })
-                }
+                onChange={(e) => onFormDataChange({ origin: e.target.value })}
                 className={cn(
                   "pl-10 font-forum",
-                  validationErrors.origin && "border-error-500 focus:border-error-500"
+                  validationErrors.origin &&
+                    "border-error-500 focus:border-error-500"
                 )}
               />
             </div>
@@ -99,7 +98,8 @@ export function RouteDialog({
                 }
                 className={cn(
                   "pl-10 font-forum",
-                  validationErrors.destination && "border-error-500 focus:border-error-500"
+                  validationErrors.destination &&
+                    "border-error-500 focus:border-error-500"
                 )}
               />
             </div>
@@ -127,7 +127,8 @@ export function RouteDialog({
                 }
                 className={cn(
                   "pl-10 font-forum",
-                  validationErrors.estimated_duration_minutes && "border-error-500 focus:border-error-500"
+                  validationErrors.estimated_duration_minutes &&
+                    "border-error-500 focus:border-error-500"
                 )}
               />
             </div>
@@ -150,11 +151,9 @@ export function RouteDialog({
           <Button
             onClick={onSubmit}
             disabled={loading}
-            className="bg-gradient-to-r from-persian-blue-500 to-dark-cyan-500 hover:from-persian-blue-600 hover:to-dark-cyan-600 text-white font-inknut"
+            className="bg-black text-white font-inknut"
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : null}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             {editingItem ? "Update" : "Create"}
           </Button>
         </DialogFooter>

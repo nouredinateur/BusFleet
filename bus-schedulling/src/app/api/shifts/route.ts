@@ -1,11 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { shiftsTable, driversTable, busesTable, routesTable } from "@/db/schema";
+import {
+  shiftsTable,
+  driversTable,
+  busesTable,
+  routesTable,
+} from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
+
+// Helper function to check if two time ranges overlap
+function timeRangesOverlap(
+  start1: string,
+  end1: string,
+  start2: string,
+  end2: string
+): boolean {
+  return start1 < end2 && start2 < end1;
+}
+
+// Helper function to add minutes to a time string (HH:MM:SS format)
+function addMinutesToTime(timeStr: string, minutes: number): string {
+  const [hours, mins] = timeStr.split(":").map(Number);
+  const totalMinutes = hours * 60 + mins + minutes;
+  const newHours = Math.floor(totalMinutes / 60) % 24;
+  const newMins = totalMinutes % 60;
+  return `${newHours.toString().padStart(2, "0")}:${newMins
+    .toString()
+    .padStart(2, "0")}`;
+}
 
 export async function GET() {
   try {
@@ -61,23 +87,62 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for scheduling conflicts
-    const existingShift = await db
-      .select()
+    // Get the route duration for the new shift
+    const [newShiftRoute] = await db
+      .select({
+        estimated_duration_minutes: routesTable.estimated_duration_minutes,
+      })
+      .from(routesTable)
+      .where(eq(routesTable.id, route_id));
+
+    if (!newShiftRoute) {
+      return NextResponse.json({ error: "Route not found" }, { status: 400 });
+    }
+
+    // Calculate end time for the new shift
+    const newShiftEndTime = addMinutesToTime(
+      shift_time,
+      newShiftRoute.estimated_duration_minutes
+    );
+
+    // Check for scheduling conflicts with overlapping shifts
+    const existingShifts = await db
+      .select({
+        id: shiftsTable.id,
+        shift_time: shiftsTable.shift_time,
+        estimated_duration_minutes: routesTable.estimated_duration_minutes,
+      })
       .from(shiftsTable)
+      .leftJoin(routesTable, eq(shiftsTable.route_id, routesTable.id))
       .where(
         and(
           eq(shiftsTable.driver_id, driver_id),
-          eq(shiftsTable.shift_date, shift_date),
-          eq(shiftsTable.shift_time, shift_time)
+          eq(shiftsTable.shift_date, shift_date)
         )
       );
 
-    if (existingShift.length > 0) {
-      return NextResponse.json(
-        { error: "Driver already has a shift at this time" },
-        { status: 400 }
+    // Check for overlaps
+    for (const existingShift of existingShifts) {
+      const existingEndTime = addMinutesToTime(
+        existingShift.shift_time,
+        existingShift.estimated_duration_minutes || 0
       );
+
+      if (
+        timeRangesOverlap(
+          shift_time,
+          newShiftEndTime,
+          existingShift.shift_time,
+          existingEndTime
+        )
+      ) {
+        return NextResponse.json(
+          {
+            error: `Driver already has an overlapping shift from ${existingShift.shift_time} to ${existingEndTime}. New shift would run from ${shift_time} to ${newShiftEndTime}.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const [shift] = await db
@@ -87,6 +152,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(shift, { status: 201 });
   } catch (error) {
+    console.log("error ====>", error);
     return NextResponse.json(
       { error: "Failed to create shift" },
       { status: 500 }
@@ -106,24 +172,64 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Get the route duration for the updated shift
+    const [updatedShiftRoute] = await db
+      .select({
+        estimated_duration_minutes: routesTable.estimated_duration_minutes,
+      })
+      .from(routesTable)
+      .where(eq(routesTable.id, route_id));
+
+    if (!updatedShiftRoute) {
+      return NextResponse.json({ error: "Route not found" }, { status: 400 });
+    }
+
+    // Calculate end time for the updated shift
+    const updatedShiftEndTime = addMinutesToTime(
+      shift_time,
+      updatedShiftRoute.estimated_duration_minutes
+    );
+
     // Check for scheduling conflicts (excluding current shift)
-    const existingShift = await db
-      .select()
+    const existingShifts = await db
+      .select({
+        id: shiftsTable.id,
+        shift_time: shiftsTable.shift_time,
+        estimated_duration_minutes: routesTable.estimated_duration_minutes,
+      })
       .from(shiftsTable)
+      .leftJoin(routesTable, eq(shiftsTable.route_id, routesTable.id))
       .where(
         and(
           eq(shiftsTable.driver_id, driver_id),
-          eq(shiftsTable.shift_date, shift_date),
-          eq(shiftsTable.shift_time, shift_time)
+          eq(shiftsTable.shift_date, shift_date)
         )
       );
 
-    const conflictingShift = existingShift.find(s => s.id !== id);
-    if (conflictingShift) {
-      return NextResponse.json(
-        { error: "Driver already has a shift at this time" },
-        { status: 400 }
+    // Check for overlaps (excluding the current shift being updated)
+    for (const existingShift of existingShifts) {
+      if (existingShift.id === id) continue; // Skip the current shift being updated
+
+      const existingEndTime = addMinutesToTime(
+        existingShift.shift_time,
+        existingShift.estimated_duration_minutes || 0
       );
+
+      if (
+        timeRangesOverlap(
+          shift_time,
+          updatedShiftEndTime,
+          existingShift.shift_time,
+          existingEndTime
+        )
+      ) {
+        return NextResponse.json(
+          {
+            error: `Driver already has an overlapping shift from ${existingShift.shift_time} to ${existingEndTime}. Updated shift would run from ${shift_time} to ${updatedShiftEndTime}.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const [shift] = await db
@@ -133,10 +239,7 @@ export async function PUT(request: NextRequest) {
       .returning();
 
     if (!shift) {
-      return NextResponse.json(
-        { error: "Shift not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Shift not found" }, { status: 404 });
     }
 
     return NextResponse.json(shift);

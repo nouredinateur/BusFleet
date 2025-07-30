@@ -123,7 +123,7 @@ export function EnhancedDataTable<TData, TValue>({
                       onChange={(event) =>
                         table.getColumn(searchKey)?.setFilterValue(event.target.value)
                       }
-                      className="pl-10 font-forum"
+                      className="pl-10 font-forum h-10"
                     />
                   </div>
                 </div>

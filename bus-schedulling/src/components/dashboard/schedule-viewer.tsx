@@ -138,7 +138,7 @@ export function ScheduleViewer({
                 type="date"
                 value={filterState.filterDate}
                 onChange={(e) => onFilterChange({ filterDate: e.target.value })}
-                className="font-forum"
+                className="font-forum h-10"
               />
             </div>
             <div className="space-y-2">

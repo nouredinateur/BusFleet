@@ -253,7 +253,7 @@ function generateRandomDate(): string {
   const today = new Date();
   const futureDate = new Date();
   futureDate.setDate(today.getDate() + 365); // One year from today
-  
+
   const date = new Date(
     today.getTime() + Math.random() * (futureDate.getTime() - today.getTime())
   );
@@ -273,13 +273,13 @@ function generateRandomTime(): string {
 async function main() {
   console.log("Starting database seeding...");
 
-  await db.delete(schema.shiftsTable);
-  await db.delete(schema.userRolesTable);
-  await db.delete(schema.driversTable);
-  await db.delete(schema.busesTable);
-  await db.delete(schema.routesTable);
-  await db.delete(schema.usersTable);
-  await db.delete(schema.rolesTable);
+  // await db.delete(schema.shiftsTable);
+  // await db.delete(schema.userRolesTable);
+  // await db.delete(schema.driversTable);
+  // await db.delete(schema.busesTable);
+  // await db.delete(schema.routesTable);
+  // await db.delete(schema.usersTable);
+  // await db.delete(schema.rolesTable);
 
   // Seed roles
   console.log("Seeding roles...");

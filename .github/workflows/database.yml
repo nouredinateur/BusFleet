@@ -25,15 +25,6 @@ on:
         required: true
         default: false
         type: boolean
-      environment:
-        description: "Target environment"
-        required: true
-        default: "development"
-        type: choice
-        options:
-          - development
-          - staging
-          - production
 
 env:
   NODE_VERSION: "20"
@@ -43,21 +34,6 @@ jobs:
   database-operations:
     name: Database Migrations & Seeding
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: bus_app_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -82,19 +58,11 @@ jobs:
       - name: Set up environment variables
         working-directory: ./bus-schedulling
         env:
-          # Use GitHub service for CI testing
-          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/bus_app_test
+          TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
         run: |
           echo "DATABASE_URL=$TEST_DATABASE_URL" > .env
           echo "NODE_ENV=test" >> .env
           echo "DATABASE_URL=$TEST_DATABASE_URL" >> $GITHUB_ENV
-
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-          done
 
       - name: Run database migrations
         if: github.event.inputs.run_migrations != 'false'

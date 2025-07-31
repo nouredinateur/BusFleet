@@ -8,7 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:reset": "pnpm db:migrate && pnpm db:seed",
+    "db:introspect": "drizzle-kit introspect"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.14",

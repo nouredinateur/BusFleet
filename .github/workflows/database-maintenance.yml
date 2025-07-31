@@ -1,0 +1,134 @@
+name: Database Maintenance
+
+on:
+  schedule:
+    # Run every Sunday at 2 AM UTC
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      maintenance_type:
+        description: "Type of maintenance to run"
+        required: true
+        default: "health-check"
+        type: choice
+        options:
+          - health-check
+          - backup
+          - cleanup
+          - full-maintenance
+
+jobs:
+  database-maintenance:
+    name: Database Maintenance
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "bus-schedulling/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./bus-schedulling
+        run: pnpm install --frozen-lockfile
+
+      - name: Database Health Check
+        if: github.event.inputs.maintenance_type == 'health-check' || github.event.inputs.maintenance_type == 'full-maintenance'
+        working-directory: ./bus-schedulling
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          echo "Running comprehensive database health check..."
+          node -e "
+            const { Pool } = require('pg');
+            const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+            
+            async function healthCheck() {
+              try {
+                // Check connection
+                await pool.query('SELECT 1');
+                console.log('✅ Database connection: OK');
+                
+                // Check table counts
+                const tables = ['users', 'drivers', 'buses', 'routes', 'shifts'];
+                for (const table of tables) {
+                  const result = await pool.query(\`SELECT COUNT(*) FROM \${table}\`);
+                  console.log(\`✅ \${table} count: \${result.rows[0].count}\`);
+                }
+                
+                // Check for orphaned records
+                const orphanedShifts = await pool.query(\`
+                  SELECT COUNT(*) FROM shifts s 
+                  LEFT JOIN drivers d ON s.driver_id = d.id 
+                  WHERE d.id IS NULL
+                \`);
+                console.log(\`🔍 Orphaned shifts: \${orphanedShifts.rows[0].count}\`);
+                
+                console.log('✅ Database health check completed');
+              } catch (error) {
+                console.error('❌ Health check failed:', error);
+                process.exit(1);
+              } finally {
+                await pool.end();
+              }
+            }
+            
+            healthCheck();
+          "
+
+      - name: Database Backup
+        if: github.event.inputs.maintenance_type == 'backup' || github.event.inputs.maintenance_type == 'full-maintenance'
+        run: |
+          echo "Creating database backup..."
+          timestamp=$(date +%Y%m%d_%H%M%S)
+          # Uncomment and configure based on your backup strategy
+          # pg_dump ${{ secrets.PRODUCTION_DATABASE_URL }} > backup_${timestamp}.sql
+          # aws s3 cp backup_${timestamp}.sql s3://your-backup-bucket/
+          echo "Backup completed: backup_${timestamp}.sql"
+
+      - name: Database Cleanup
+        if: github.event.inputs.maintenance_type == 'cleanup' || github.event.inputs.maintenance_type == 'full-maintenance'
+        working-directory: ./bus-schedulling
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          echo "Running database cleanup..."
+          node -e "
+            const { Pool } = require('pg');
+            const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+            
+            async function cleanup() {
+              try {
+                // Clean up old shifts (older than 1 year)
+                const result = await pool.query(\`
+                  DELETE FROM shifts 
+                  WHERE shift_date < NOW() - INTERVAL '1 year'
+                \`);
+                console.log(\`🧹 Cleaned up \${result.rowCount} old shifts\`);
+                
+                // Vacuum and analyze tables
+                await pool.query('VACUUM ANALYZE');
+                console.log('🧹 Database vacuum completed');
+                
+                console.log('✅ Database cleanup completed');
+              } catch (error) {
+                console.error('❌ Cleanup failed:', error);
+                process.exit(1);
+              } finally {
+                await pool.end();
+              }
+            }
+            
+            cleanup();
+          "

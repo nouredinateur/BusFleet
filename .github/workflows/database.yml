@@ -1,0 +1,187 @@
+name: Database Operations
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "bus-schedulling/drizzle/**"
+      - "bus-schedulling/src/db/**"
+      - "bus-schedulling/drizzle.config.ts"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "bus-schedulling/drizzle/**"
+      - "bus-schedulling/src/db/**"
+      - "bus-schedulling/drizzle.config.ts"
+  workflow_dispatch:
+    inputs:
+      run_migrations:
+        description: "Run database migrations"
+        required: true
+        default: true
+        type: boolean
+      run_seeding:
+        description: "Run database seeding"
+        required: true
+        default: false
+        type: boolean
+      environment:
+        description: "Target environment"
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  database-operations:
+    name: Database Migrations & Seeding
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bus_app_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+          cache-dependency-path: "bus-schedulling/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./bus-schedulling
+        run: pnpm install --frozen-lockfile
+
+      - name: Set up environment variables
+        working-directory: ./bus-schedulling
+        run: |
+          echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/bus_app_test" > .env
+          echo "NODE_ENV=test" >> .env
+
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
+      - name: Run database migrations
+        if: github.event.inputs.run_migrations != 'false'
+        working-directory: ./bus-schedulling
+        run: |
+          echo "Running database migrations..."
+          pnpm drizzle-kit push
+
+      - name: Verify migration status
+        working-directory: ./bus-schedulling
+        run: |
+          echo "Checking migration status..."
+          pnpm drizzle-kit introspect
+
+      - name: Run database seeding
+        if: github.event.inputs.run_seeding == 'true' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[seed]'))
+        working-directory: ./bus-schedulling
+        run: |
+          echo "Running database seeding..."
+          pnpm tsx src/db/seed.ts
+
+      - name: Run database health check
+        working-directory: ./bus-schedulling
+        run: |
+          echo "Running database health check..."
+          node -e "
+            const { Pool } = require('pg');
+            const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+            pool.query('SELECT COUNT(*) FROM users')
+              .then(result => {
+                console.log('✅ Database health check passed');
+                console.log('Users count:', result.rows[0].count);
+                process.exit(0);
+              })
+              .catch(err => {
+                console.error('❌ Database health check failed:', err);
+                process.exit(1);
+              });
+          "
+
+  production-deployment:
+    name: Production Database Operations
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: database-operations
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+          cache-dependency-path: "bus-schedulling/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./bus-schedulling
+        run: pnpm install --frozen-lockfile
+
+      - name: Set up production environment
+        working-directory: ./bus-schedulling
+        run: |
+          echo "DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }}" > .env
+          echo "NODE_ENV=production" >> .env
+
+      - name: Run production migrations
+        working-directory: ./bus-schedulling
+        run: |
+          echo "Running production migrations..."
+          pnpm drizzle-kit push
+
+      - name: Backup database (optional)
+        if: contains(github.event.head_commit.message, '[backup]')
+        run: |
+          echo "Creating database backup..."
+          # Add your backup logic here
+          # pg_dump ${{ secrets.PRODUCTION_DATABASE_URL }} > backup_$(date +%Y%m%d_%H%M%S).sql
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Production database operations completed successfully"
+          else
+            echo "❌ Production database operations failed"
+          fi

@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Avatar from "boring-avatars";
+import Avatar from "@/components/ui/avatar-wrapper";
 import { ArrowUpDown } from "lucide-react";
 import { Driver } from "../types";
 import { UserPermissions } from "@/lib/permissions";

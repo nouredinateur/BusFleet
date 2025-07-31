@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import Avatar from "boring-avatars";
+import Avatar from "@/components/ui/avatar-wrapper";
 import { Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { Route } from "../types";
 import { UserPermissions } from "@/lib/permissions";
